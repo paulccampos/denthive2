@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | DentHive Dental Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#d5ecf8",
+                      "primary-container": "#1976d2",
+                      "on-tertiary-container": "#fdfdff",
+                      "secondary": "#006b5f",
+                      "surface-container-lowest": "#ffffff",
+                      "on-surface-variant": "#414752",
+                      "on-primary-fixed": "#001c3a",
+                      "tertiary": "#505e68",
+                      "error-container": "#ffdad6",
+                      "on-background": "#071e27",
+                      "tertiary-fixed-dim": "#bac9d3",
+                      "inverse-on-surface": "#dff4ff",
+                      "on-surface": "#071e27",
+                      "inverse-primary": "#a5c8ff",
+                      "surface-variant": "#cfe6f2",
+                      "surface-tint": "#005faf",
+                      "on-secondary-fixed": "#00201c",
+                      "on-tertiary-fixed": "#0f1d25",
+                      "on-secondary-container": "#007165",
+                      "primary-fixed-dim": "#a5c8ff",
+                      "secondary-container": "#8df5e4",
+                      "background": "#f3faff",
+                      "on-primary-container": "#fffdff",
+                      "surface-container-low": "#e6f6ff",
+                      "secondary-fixed-dim": "#70d8c8",
+                      "surface-container": "#dbf1fe",
+                      "surface-bright": "#f3faff",
+                      "outline-variant": "#c1c6d4",
+                      "primary": "#005dac",
+                      "on-tertiary-fixed-variant": "#3b4951",
+                      "on-primary": "#ffffff",
+                      "inverse-surface": "#1e333c",
+                      "surface": "#f3faff",
+                      "on-primary-fixed-variant": "#004786",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed": "#d6e5ef",
+                      "secondary-fixed": "#8df5e4",
+                      "tertiary-container": "#697781",
+                      "outline": "#717783",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#cfe6f2",
+                      "primary-fixed": "#d4e3ff",
+                      "on-secondary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface-dim": "#c7dde9",
+                      "on-secondary-fixed-variant": "#005048",
+                      "on-error-container": "#93000a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "xl": "40px",
+                      "sm": "8px",
+                      "md": "16px",
+                      "lg": "24px",
+                      "gutter": "16px",
+                      "xs": "4px",
+                      "margin-desktop": "32px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "label-caps": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "display-lg-mobile": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "title-sm": ["Inter"],
+                      "data-mono": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "display-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "title-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "data-mono": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.15);
+        }
+        .login-card-shadow {
+            box-shadow: 0 12px 24px -10px rgba(25, 118, 210, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<main class="flex h-screen w-full">
+<!-- Left Section: Branding & Form -->
+<section class="w-full md:w-1/2 lg:w-2/5 flex flex-col justify-center items-center px-margin-mobile md:px-xl relative z-10 bg-surface">
+<div class="w-full max-w-[400px]">
+<!-- Logo & Header -->
+<header class="mb-lg">
+<div class="flex items-center gap-sm mb-md">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">dentistry</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-primary tracking-tight">DentHive</h1>
+</div>
+<h2 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background mb-xs">Welcome back</h2>
+<p class="text-on-surface-variant font-body-md">Precision management for the modern practice.</p>
+</header>
+<!-- Login Form -->
+<form class="space-y-md" id="loginForm">
+<!-- Username/Email -->
+<div class="space-y-xs">
+<label class="font-label-caps text-label-caps text-outline block" for="identity">USERNAME OR EMAIL</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline-variant">person</span>
+<input class="w-full pl-[48px] pr-md py-md bg-white border border-outline-variant rounded-lg font-body-md transition-all focus:border-primary" id="identity" name="identity" placeholder="dr.smith@denthive.com" type="text"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-xs">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-outline block" for="password">PASSWORD</label>
+<a class="font-label-caps text-label-caps text-primary hover:underline" href="#">FORGOT PASSWORD?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline-variant">lock</span>
+<input class="w-full pl-[48px] pr-md py-md bg-white border border-outline-variant rounded-lg font-body-md transition-all focus:border-primary" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Actions -->
+<div class="pt-sm space-y-md">
+<button class="w-full py-md bg-primary text-on-primary font-title-sm text-title-sm rounded-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-sm" type="submit">
+                            Sign In
+                        </button>
+<div class="flex items-center gap-md py-sm">
+<div class="h-px w-full bg-outline-variant"></div>
+<span class="font-label-caps text-label-caps text-outline whitespace-nowrap">OR JOIN US</span>
+<div class="h-px w-full bg-outline-variant"></div>
+</div>
+<button class="w-full py-md border border-primary text-primary font-title-sm text-title-sm rounded-lg hover:bg-surface-container-high transition-all flex items-center justify-center gap-sm" type="button">
+                            Create Patient Account
+                        </button>
+</div>
+</form>
+<!-- Footer -->
+<footer class="mt-xl">
+<p class="font-body-sm text-body-sm text-on-surface-variant text-center">
+                        Securely managed by DentHive Systems © 2024. <br/>
+<a class="text-primary underline" href="#" id="privacyPolicyLink">Privacy Policy</a> • <a class="text-primary underline" href="#">Terms of Service</a>
+</p>
+
+<!-- Demo Login Accounts (shown under Privacy Policy for testing only) -->
+<div id="demoAccounts" class="hidden mt-md bg-white/70 backdrop-blur-md border border-outline-variant rounded-xl p-md text-left">
+  <p class="font-label-caps text-label-caps text-outline mb-xs">Demo Accounts</p>
+  <p class="text-[13px] text-on-surface-variant mb-md">Password for ALL accounts: <span class="font-mono font-bold">patient1</span></p>
+  <div class="space-y-xs text-[13px]">
+    <div><span class="font-bold">Admin</span> — username: <span class="font-mono">admin</span> (admin@denthive.local)</div>
+    <div><span class="font-bold">Secretary</span> — username: <span class="font-mono">secretary</span> (secretary@denthive.local)</div>
+    <div><span class="font-bold">Doctor</span> — username: <span class="font-mono">doctor</span> (doctor@denthive.local)</div>
+    <div><span class="font-bold">Patient</span> — username: <span class="font-mono">patient</span> (patient@denthive.local)</div>
+  </div>
+</div>
+</footer>
+</div>
+</section>
+<!-- Right Section: Visual / Illustration -->
+<section class="hidden md:block md:w-1/2 lg:w-3/5 bg-surface-container relative overflow-hidden">
+<!-- Background Image -->
+<img class="w-full h-full object-cover" data-alt="A high-end modern dental clinic treatment room featuring a minimalist aesthetic. The room is flooded with soft natural daylight from large windows. In the center is a state-of-the-art ergonomic white dental chair. The palette consists of pristine whites, clinical light blues, and polished metallic surfaces. The atmosphere is quiet, hygienic, and professional, evoking a sense of calm and precision for patient care." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZWVJn0ssW7xEzKaPalNskeYwzXItDL0SmiacTcq3WvbrFLniaF5deW1EHbd9BCHFmfOzC_1bnbMdwNypRLl7qmqvGe-VOCuRQmUqaV4S0tqdSgw7qPUEznv8V8Lei6xAy8Nq-FftvqrPDGbzd32gohL320E8E1Z_0T6kxAi1uwhphf8T25fYcUgrN05hTSuopHZD-vhAlUClMeVxSUChUD1ELChhdlpj4xQ0O03KKMLgdzMM_eI8MZYd1QLJqYrHcMVZcml5Ata8w"/>
+<!-- Overlay Content -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent flex items-end p-xl">
+<div class="bg-white/80 backdrop-blur-md p-lg rounded-xl border border-white/20 max-w-md login-card-shadow">
+<div class="flex gap-xs mb-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-title-sm text-title-sm text-on-surface mb-sm italic">
+                        "The most intuitive patient records system we've ever used. The dental map clarity is unmatched."
+                    </p>
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-primary font-bold overflow-hidden">
+<img alt="Dr. Sarah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9TlSofbkni3FgAx8o5uQfVHfkSxF8BU11Zb_gfE3TUQH2KDSH1XWcDFBEUmFPJSp5IbzX8PDA-Q4w-3Uva2aavpraA6GC7reLLXTVP1QyvDxNNZowcT2IQbyEEolS5yMJTT8QkEYom6qH9G0Yiqh7rnGXzQ3_rdPAA0EKaZ4ME40Hw4olXxLzw_gg8L2W1NQvW7E2CfXya2G95JitXWWrzd0Dp9k6w6U-ee4uKRMWlg6-Drlt7GV9QL-vwlnE23FojqLXtyaxlmwj"/>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface">DR. SARAH CHEN</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Chief of Orthodontics</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Dental Icons Decoration -->
+<div class="absolute top-margin-desktop right-margin-desktop space-y-md">
+<div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center animate-bounce transition-all" style="animation-duration: 3s;">
+<span class="material-symbols-outlined text-white">monitoring</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center animate-bounce transition-all" style="animation-delay: 0.5s; animation-duration: 4s;">
+<span class="material-symbols-outlined text-white">calendar_today</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center animate-bounce transition-all" style="animation-delay: 1s; animation-duration: 3.5s;">
+<span class="material-symbols-outlined text-white">shield_with_heart</span>
+</div>
+</div>
+</section>
+</main>
+<script>
+        // Micro-interactions
+        const loginForm = document.getElementById('loginForm');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Authenticating...
+            `;
+
+            (async () => {
+                const identity = document.getElementById('identity')?.value?.trim();
+                const password = document.getElementById('password')?.value;
+
+                try {
+                    const resp = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ identity, password })
+                    });
+
+                    const data = await resp.json();
+                    if (!resp.ok) throw new Error(data.error || 'Login failed');
+
+                    localStorage.setItem('denthiveToken', data.token);
+                    const role = data.role;
+
+                    if (role === 'patient') window.location.href = '/bookingpage';
+                    else if (role === 'secretary') window.location.href = '/queuemanagement';
+                    else if (role === 'admin') window.location.href = '/adminpage';
+                    else window.location.href = '/patientdashboard';
+                } catch (err) {
+                    alert(err.message || 'Login failed');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })();
+        });
+
+        // Hover effect on password field
+        const passwordInput = document.getElementById('password');
+        const lockIcon = passwordInput.previousElementSibling;
+        
+        passwordInput.addEventListener('focus', () => {
+            lockIcon.style.color = '#1976d2';
+            lockIcon.style.transition = 'color 0.2s ease';
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            lockIcon.style.color = '#c1c6d4';
+        });
+    </script>
+
+<script>
+  // Toggle demo credentials under "Privacy Policy" (for local testing only)
+  const privacyLink = document.getElementById('privacyPolicyLink');
+  const demoAccounts = document.getElementById('demoAccounts');
+  if (privacyLink && demoAccounts) {
+    privacyLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      demoAccounts.classList.toggle('hidden');
+    });
+  }
+</script>
+</body></html>
+

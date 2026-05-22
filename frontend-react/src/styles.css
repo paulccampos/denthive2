@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Minimal styling so it looks OK even without full Tailwind setup */
+body { margin: 0; font-family: Inter, system-ui, Arial, sans-serif; }
+
