@@ -38,23 +38,17 @@ async function start() {
 
   app.get('/health', (_req, res) => res.json({ ok: true }));
 
-  // Serve frontend (local run, no bundler)
+  // Serve React frontend build instead of plain HTML pages
   const path = require('path');
-  const frontendRoot = path.join(__dirname, '..', 'frontend');
+  const frontendRoot = path.join(__dirname, '..', 'frontend-react', 'dist');
 
-  // Serve HTML pages so /login works, /signup works, etc.
   app.use(express.static(frontendRoot));
-  app.get('/', (_req, res) => res.sendFile(path.join(frontendRoot, 'landingpage.html')));
 
-  // Convenience routes
-  app.get('/login', (_req, res) => res.sendFile(path.join(frontendRoot, 'login.html')));
-  app.get('/signup', (_req, res) => res.sendFile(path.join(frontendRoot, 'signup.html')));
-  app.get('/bookingpage', (_req, res) => res.sendFile(path.join(frontendRoot, 'bookingpage.html')));
-  app.get('/patientdashboard', (_req, res) => res.sendFile(path.join(frontendRoot, 'patientdashboard.html')));
-  app.get('/queuemanagement', (_req, res) => res.sendFile(path.join(frontendRoot, 'queuemanagement.html')));
-  app.get('/registry', (_req, res) => res.sendFile(path.join(frontendRoot, 'registry.html')));
-  app.get('/adminpage', (_req, res) => res.sendFile(path.join(frontendRoot, 'adminpage.html')));
-
+  // SPA fallback: let React Router handle /login, /signup, etc.
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    return res.sendFile(path.join(frontendRoot, 'index.html'));
+  });
 
   app.use('/api/auth', authRouter);
   app.use('/api/patients', patientsRouter);
@@ -63,9 +57,17 @@ async function start() {
   app.use('/api/clinical-records', clinicalRouter);
   app.use('/api/admin', adminRouter);
 
-  // seed default users
-  const { seedDefaults } = require('./seed');
-  await seedDefaults();
+
+  // seed default users (non-blocking: never prevent server startup)
+  try {
+    const { seedDefaults } = require('./seed');
+    await Promise.race([
+      seedDefaults(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('seed timed out')), 15000)),
+    ]);
+  } catch (e) {
+    console.warn('[DentHive] Seed skipped/failed:', e?.message || e);
+  }
 
   app.listen(PORT, () => {
     console.log(`[DentHive] API running at http://localhost:${PORT}`);

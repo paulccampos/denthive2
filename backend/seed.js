@@ -3,7 +3,6 @@ const User = require('./models/User');
 const Patient = require('./models/Patient');
 
 async function seedDefaults() {
-  // create default staff accounts if missing
   const defaults = [
     // Password for ALL seeded accounts is: patient1
     { role: 'admin', email: 'admin@denthive.local', password: 'patient1', username: 'admin' },
@@ -11,56 +10,87 @@ async function seedDefaults() {
     { role: 'doctor', email: 'doctor@denthive.local', password: 'patient1', username: 'doctor' },
   ];
 
+  const hashPw = async (pw) => bcrypt.hash(pw, 10);
 
-
+  // Ensure staff accounts always exist (even if patients already exist)
   for (const d of defaults) {
-    const exists = await User.findOne({ $or: [{ email: d.email }, { username: d.username }] });
-    if (exists) {
-      // keep role in sync and ensure password matches the seeded credentials
-      if (exists.role !== d.role) exists.role = d.role;
-      exists.active = true;
-      exists.passwordHash = await bcrypt.hash(d.password, 10);
-      await exists.save();
+    // Avoid slow $or with two unique indexes: try email first, then username.
+    const existsByEmail = await User.findOne({ email: d.email }).lean();
+    const existsByUsername = !existsByEmail ? await User.findOne({ username: d.username }).lean() : null;
+
+    const exists = existsByEmail || existsByUsername;
+
+    if (exists && exists._id) {
+      await User.updateOne(
+        { _id: exists._id },
+        {
+          $set: {
+            role: d.role,
+            active: true,
+            passwordHash: await hashPw(d.password),
+          },
+        }
+      );
       continue;
     }
 
-    const passwordHash = await bcrypt.hash(d.password, 10);
-    await User.create({ email: d.email, username: d.username, passwordHash, role: d.role, active: true });
-
+    await User.create({
+      email: d.email,
+      username: d.username,
+      passwordHash: await hashPw(d.password),
+      role: d.role,
+      active: true,
+    });
   }
 
-  // create a demo patient if none exists
-  const patientCount = await Patient.countDocuments();
-  // Only seed demo patient when database is empty (keeps credentials stable for testing)
-  if (patientCount > 0) {
-    return;
+  // Ensure demo patient + user exist
+  const patient = await Patient.findOne({ denthivePatientId: 'DC-0001' });
+  if (!patient) {
+    const created = await Patient.create({
+      denthivePatientId: 'DC-0001',
+      firstName: 'Demo',
+      lastName: 'Patient',
+      email: 'patient@denthive.local',
+      phone: '+1 555 000 0000',
+      status: 'active',
+    });
+
+    const user = await User.create({
+      email: created.email,
+      username: 'patient',
+      passwordHash: await hashPw('patient1'),
+      role: 'patient',
+      active: true,
+      patientId: created._id,
+    });
+
+    created.userId = user._id;
+    await created.save();
+  } else {
+    // Ensure patient user exists
+    if (!patient.userId) {
+      const existingUser = await User.findOne({ role: 'patient', patientId: patient._id });
+      if (!existingUser) {
+        const user = await User.create({
+          email: patient.email,
+          username: 'patient',
+          passwordHash: await hashPw('patient1'),
+          role: 'patient',
+          active: true,
+          patientId: patient._id,
+        });
+        patient.userId = user._id;
+        await patient.save();
+      }
+    } else {
+      // Keep password stable for demo
+      await User.updateOne(
+        { _id: patient.userId },
+        { $set: { passwordHash: await hashPw('patient1'), active: true } }
+      );
+    }
   }
 
-
-  const patient = await Patient.create({
-    denthivePatientId: 'DC-0001',
-    firstName: 'Demo',
-    lastName: 'Patient',
-    email: 'patient@denthive.local',
-    phone: '+1 555 000 0000',
-    status: 'active',
-  });
-
-  const passwordHash = await bcrypt.hash('patient1', 10);
-
-  const user = await User.create({
-    email: patient.email,
-    username: 'patient',
-    passwordHash,
-    role: 'patient',
-    active: true,
-    patientId: patient._id,
-  });
-
-  patient.userId = user._id;
-  await patient.save();
-
-  // Print seeded credentials once per server startup (useful for local testing)
   const seeded = {
     password: 'patient1',
     accounts: [
@@ -77,5 +107,6 @@ async function seedDefaults() {
 }
 
 module.exports = { seedDefaults };
+
 
 

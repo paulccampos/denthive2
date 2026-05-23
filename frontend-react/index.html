@@ -4,6 +4,77 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DentHive</title>
+
+    <!-- Tailwind CDN (so the existing Tailwind class-based HTML designs work in React) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Fonts + Material icons (matching the HTML templates) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind config parity (use the same base colors as existing templates) -->
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              secondary: "#006b5f",
+              outline: "#717783",
+              background: "#f3faff",
+              "on-background": "#071e27",
+              surface: "#f3faff",
+              "on-surface": "#071e27",
+              "surface-container-low": "#e6f6ff",
+              "surface-container-high": "#d5ecf8",
+              "surface-container-highest": "#cfe6f2",
+              "surface-variant": "#cfe6f2",
+              primary: "#005dac",
+              "primary-container": "#1976d2",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#fffdff",
+              "secondary-container": "#8df5e4",
+              "on-secondary-container": "#007165",
+              tertiary: "#505e68",
+              "tertiary-fixed": "#d6e5ef",
+              error: "#ba1a1a",
+              "error-container": "#ffdad6",
+              "outline-variant": "#c1c6d4",
+              "on-surface-variant": "#414752",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "margin-desktop": "32px",
+              "margin-mobile": "16px",
+              gutter: "16px",
+              base: "8px",
+            },
+            fontFamily: {
+              "label-caps": ["Inter"],
+              "body-md": ["Inter"],
+              "headline-md": ["Inter"],
+              "data-mono": ["JetBrains Mono"],
+            },
+            fontSize: {
+              "label-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "700" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "body-sm": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+              "headline-md": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "title-sm": ["16px", { lineHeight: "24px", fontWeight: "600" }],
+              "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "display-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }],
+              "data-mono": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+            },
+          },
+        },
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
