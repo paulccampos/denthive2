@@ -3,12 +3,38 @@ import { apiFetch } from '../lib/api'
 
 const TEETH = ['Upper 1', 'Upper 2', 'Upper 3', 'Upper 4', 'Upper 5', 'Upper 16', 'Upper 15', 'Upper 14', 'Upper 13', 'Upper 12', 'Upper 11', 'Upper 10', 'Upper 9', 'Upper 8', 'Upper 7', 'Upper 6', 'Lower 1', 'Lower 2', 'Lower 3', 'Lower 4', 'Lower 5', 'Lower 16', 'Lower 15', 'Lower 14', 'Lower 13', 'Lower 12', 'Lower 11', 'Lower 10', 'Lower 9', 'Lower 8', 'Lower 7', 'Lower 6']
 
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+
+function getMonthMatrix(year, monthIndex) {
+  // monthIndex: 0-11
+  // JS getDay: 0=Sun..6=Sat
+  const first = new Date(year, monthIndex, 1)
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
+
+  const firstDay = first.getDay() // 0..6 (Sun..Sat)
+  // convert to our column index where MON=0..SUN=6
+  const offset = (firstDay + 6) % 7
+
+  const cells = []
+  for (let i = 0; i < offset; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  // pad to full weeks
+  while (cells.length % 7 !== 0) cells.push(null)
+  return cells
+}
+
 export default function Booking() {
   const [reason, setReason] = useState('General Checkup')
   const [doctor, setDoctor] = useState('Any Available Practitioner')
 
   const [time, setTime] = useState('10:30 AM')
-  const [dateDay, setDateDay] = useState('6')
+  // Calendar state
+  const [calendarMonth, setCalendarMonth] = useState(4) // 0-based (May)
+  const [calendarYear, setCalendarYear] = useState(2026)
+  const [selectedDate, setSelectedDate] = useState({ day: 6 })
+
   const [selectedTeeth, setSelectedTeeth] = useState([])
   const [loading, setLoading] = useState(false)
 
@@ -18,6 +44,52 @@ export default function Booking() {
     () => ['09:00 AM', '09:45 AM', '10:30 AM', '11:15 AM', '01:00 PM', '01:45 PM', '02:30 PM', '03:15 PM'],
     []
   )
+
+  const [availability, setAvailability] = useState([])
+  const [availabilityLoading, setAvailabilityLoading] = useState(false)
+
+  function toISODate(dateNumber) {
+    // Convert selectedDate.day within current calendarMonth/year to YYYY-MM-DD.
+    // Note: Backend expects YYYY-MM-DD and treats it as UTC day boundaries.
+    const monthIndex = calendarMonth // 0-based
+    return `${calendarYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(dateNumber).padStart(2, '0')}`
+  }
+
+  async function fetchAvailability() {
+    try {
+      if (!selectedDate?.day) return
+      setAvailabilityLoading(true)
+      const dateStr = toISODate(selectedDate.day)
+      const doctorParam = doctor
+
+      const resp = await apiFetch(`/appointments/availability?date=${encodeURIComponent(dateStr)}&doctor=${encodeURIComponent(doctorParam)}`)
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data.error || 'Failed to load availability')
+
+      setAvailability(data.availability || [])
+
+      // If currently selected time is no longer available, pick first available.
+      const current = (data.availability || []).find((x) => x.slot === time)
+      if (current && !current.available) {
+        const firstAvail = (data.availability || []).find((x) => x.available)
+        if (firstAvail) setTime(firstAvail.slot)
+      }
+
+      // If nothing selected at all, pick first available.
+      if (!time && (data.availability || []).some((x) => x.available)) {
+        const firstAvail = (data.availability || []).find((x) => x.available)
+        if (firstAvail) setTime(firstAvail.slot)
+      }
+    } catch {
+      // Keep previous UI rather than blank.
+    } finally {
+      setAvailabilityLoading(false)
+    }
+  }
+
+
+
+
 
   function toggleTooth(name) {
     setSelectedTeeth((cur) => (cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]))
@@ -32,8 +104,10 @@ export default function Booking() {
 
     setLoading(true)
     try {
-      // Use same-ish semantics as backend expects: scheduledAt ISO
-      const scheduledAt = new Date(`2023-10-${String(dateDay).padStart(2, '0')} ${time}`).toISOString()
+      const monthIndex = calendarMonth // 0-based
+      const scheduledAt = new Date(
+        `${calendarYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(selectedDate.day).padStart(2, '0')} ${time}`
+      ).toISOString()
 
       const resp = await apiFetch('/appointments', {
         method: 'POST',
@@ -131,43 +205,92 @@ export default function Booking() {
                     <span className="material-symbols-outlined text-primary">calendar_today</span>
                     02. SELECT DATE
                   </h3>
-                  <div className="flex items-center gap-md">
-                    <button className="material-symbols-outlined p-xs hover:bg-surface-container transition-colors rounded-lg" type="button">chevron_left</button>
-                    <span className="font-title-sm">October 2023</span>
-                    <button className="material-symbols-outlined p-xs hover:bg-surface-container transition-colors rounded-lg" type="button">chevron_right</button>
+                <div className="flex items-center gap-md">
+                    <button
+                      className="material-symbols-outlined p-xs hover:bg-surface-container transition-colors rounded-lg"
+                      type="button"
+                      onClick={() => {
+                        if (calendarMonth === 0) {
+                          setCalendarMonth(11)
+                          setCalendarYear((y) => y - 1)
+                        } else {
+                          setCalendarMonth((m) => m - 1)
+                        }
+                      }}
+                    >
+                      chevron_left
+                    </button>
+                    <span className="font-title-sm">{MONTH_NAMES[calendarMonth]} {calendarYear}</span>
+                    <button
+                      className="material-symbols-outlined p-xs hover:bg-surface-container transition-colors rounded-lg"
+                      type="button"
+                      onClick={() => {
+                        if (calendarMonth === 11) {
+                          setCalendarMonth(0)
+                          setCalendarYear((y) => y + 1)
+                        } else {
+                          setCalendarMonth((m) => m + 1)
+                        }
+                      }}
+                    >
+                      chevron_right
+                    </button>
                   </div>
                 </div>
 
-                <div className="calendar-grid text-center font-label-caps text-outline mb-sm">
-                  <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div className="text-error/50">SAT</div><div className="text-error/50">SUN</div>
+                <div className="grid grid-cols-7 text-center font-label-caps text-outline mb-sm">
+                  {WEEKDAYS.map((w, idx) => (
+                    <div key={w} className={(w === 'SAT' || w === 'SUN') ? 'text-error/50' : ''}>
+                      {w}
+                    </div>
+                  ))}
                 </div>
 
-                <div className="calendar-grid gap-xs">
-                  {[1,2,3,4,5,6,7,8,9,10,11,12,13,14].map((d) => {
-                    const disabled = [1,2,8,9].includes(d)
-                    const isActive = String(dateDay) === String(d)
-                    return (
-                      <button
-                        key={d}
-                        type="button"
-                        disabled={disabled}
-                        className={
-                          'h-16 border border-outline-variant rounded-lg ' +
-                          (disabled
-                            ? 'text-error/40 cursor-not-allowed flex flex-col items-center justify-center bg-surface-container-low'
-                            : isActive
-                              ? 'border-2 border-primary bg-primary-container text-on-primary-container font-bold rounded-lg flex flex-col items-center justify-center shadow-md relative'
-                              : 'hover:border-primary hover:bg-surface-container transition-all flex flex-col items-center justify-center')
+                {(() => {
+                  const cells = getMonthMatrix(calendarYear, calendarMonth)
+                  return (
+                    <div className="grid grid-cols-7 gap-xs">
+                      {cells.map((d, idx) => {
+                        if (!d) {
+                          return <div key={`empty-${idx}`} className="h-16" />
                         }
-                        onClick={() => setDateDay(String(d))}
-                      >
-                        {d}
-                        {disabled ? <span className="text-[10px]">{d === 1 || d === 2 ? 'Closed' : 'Full'}</span> : null}
-                        {!disabled && isActive ? <span className="absolute bottom-1 w-1 h-1 bg-white rounded-full" /> : null}
-                      </button>
-                    )
-                  })}
-                </div>
+
+                        // If backend marks all slots unavailable, treat the day as unavailable.
+                        const dayAvail = availabilityLoading
+                          ? true
+                          : (() => {
+                            if (!availability?.length) return true
+                            return availability.some((x) => x.available)
+                          })()
+
+                        const disabled = !dayAvail
+                        const isActive = selectedDate.day === d
+
+
+                        return (
+                          <button
+                            key={d}
+                            type="button"
+                            disabled={disabled}
+                            className={
+                              'h-16 border border-outline-variant rounded-lg ' +
+                              (disabled
+                                ? 'text-error/40 cursor-not-allowed flex flex-col items-center justify-center bg-surface-container-low'
+                                : isActive
+                                  ? 'border-2 border-primary bg-primary-container text-on-primary-container font-bold rounded-lg flex flex-col items-center justify-center shadow-md relative'
+                                  : 'hover:border-primary hover:bg-surface-container transition-all flex flex-col items-center justify-center')
+                            }
+                            onClick={() => setSelectedDate({ day: d })}
+                          >
+                            {d}
+                            {disabled ? <span className="text-[10px]">{d === 1 || d === 2 ? 'Closed' : 'Full'}</span> : null}
+                            {!disabled && isActive ? <span className="absolute bottom-1 w-1 h-1 bg-white rounded-full" /> : null}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
               </section>
 
               <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg overflow-hidden">
@@ -180,38 +303,66 @@ export default function Booking() {
                 <div className="flex flex-col md:flex-row gap-lg items-center justify-center">
                   <div className="w-full max-w-[400px] bg-surface-container-low p-md rounded-xl border border-outline-variant">
                     {/* Simplified SVG: still click-to-toggle, but React-driven */}
-                    <svg className="w-full h-auto select-none" viewBox="0 0 400 300">
+                    <svg className="w-full h-auto select-none" viewBox="0 0 420 320" preserveAspectRatio="xMidYMid meet">
+                      {/* Oval/open-mouth teeth layout (top + bottom rows) */}
                       <g>
-                        {TEETH.slice(0, 16).map((t, idx) => (
-                          <rect
-                            key={t}
-                            x={100 + idx * 18}
-                            y={40 + (idx % 2) * 4}
-                            width={16}
-                            height={22 - (idx % 3) * 2}
-                            rx={4}
-                            fill={selectedTeeth.includes(t) ? '#1976d2' : 'transparent'}
-                            stroke={selectedTeeth.includes(t) ? '#005dac' : '#717783'}
-                            strokeWidth={1}
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => toggleTooth(t)}
-                          />
-                        ))}
-                        {TEETH.slice(16, 24).map((t, idx) => (
-                          <rect
-                            key={t}
-                            x={100 + idx * 18}
-                            y={210}
-                            width={16}
-                            height={22}
-                            rx={4}
-                            fill={selectedTeeth.includes(t) ? '#1976d2' : 'transparent'}
-                            stroke={selectedTeeth.includes(t) ? '#005dac' : '#717783'}
-                            strokeWidth={1}
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => toggleTooth(t)}
-                          />
-                        ))}
+                        {(() => {
+                          const top = TEETH.slice(0, 16)
+                          const bottom = TEETH.slice(16, 32)
+                          const cx = 210
+                          const rx = 175
+                          const topY = 120
+                          const bottomY = 230
+
+                          return (
+                            <>
+                              {top.map((t, idx) => {
+                                // Map idx across [-1..1] and place on an arc
+                                const a = (idx / (top.length - 1)) * Math.PI // 0..PI
+                                const x = cx + Math.cos(Math.PI - a) * rx
+                                const y = topY - Math.sin(Math.PI - a) * 28
+                                return (
+                                  <rect
+                                    key={t}
+                                    x={x - 8}
+                                    y={y - 11}
+                                    width={12}
+                                    height={20}
+                                    rx={4}
+
+                                    fill={selectedTeeth.includes(t) ? '#1976d2' : 'transparent'}
+                                    stroke={selectedTeeth.includes(t) ? '#005dac' : '#717783'}
+                                    strokeWidth={1}
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => toggleTooth(t)}
+                                  />
+                                )
+                              })}
+
+                              {bottom.map((t, idx) => {
+                                const a = (idx / (bottom.length - 1)) * Math.PI
+                                const x = cx + Math.cos(Math.PI - a) * rx
+                                const y = bottomY + Math.sin(Math.PI - a) * 16
+                                return (
+                                  <rect
+                                    key={t}
+                                    x={x - 8}
+                                    y={y - 11}
+                                    width={12}
+                                    height={20}
+                                    rx={4}
+
+                                    fill={selectedTeeth.includes(t) ? '#1976d2' : 'transparent'}
+                                    stroke={selectedTeeth.includes(t) ? '#005dac' : '#717783'}
+                                    strokeWidth={1}
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => toggleTooth(t)}
+                                  />
+                                )
+                              })}
+                            </>
+                          )
+                        })()}
                       </g>
                     </svg>
                   </div>
@@ -247,7 +398,9 @@ export default function Booking() {
                 <div className="grid grid-cols-2 gap-sm">
                   {timeSlots.map((s) => {
                     const isActive = s === time
-                    const disabled = ['01:00 PM'].includes(s)
+                    const slotObj = (availability || []).find((x) => x.slot === s)
+                    const disabled = availabilityLoading ? false : !!(slotObj && !slotObj.available)
+
                     return (
                       <button
                         key={s}
@@ -287,7 +440,7 @@ export default function Booking() {
                     <span className="material-symbols-outlined mt-1">event</span>
                     <div>
                       <p className="text-xs text-white/70 font-label-caps">WHEN</p>
-                      <p className="font-title-sm">Oct {dateDay}, 2023 at {time}</p>
+                      <p className="font-title-sm">{MONTH_NAMES[calendarMonth]} {selectedDate.day}, {calendarYear} at {time}</p>
                     </div>
                   </div>
                 </div>

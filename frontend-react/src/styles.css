@@ -73,3 +73,10 @@ body {
 /* Selected tooth colors parity */
 .tooth-selected { fill: #1976d2 !important; stroke: #005dac !important; }
 
+/* Calendar fallback (if Tailwind grid utilities are not compiled for some reason) */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+

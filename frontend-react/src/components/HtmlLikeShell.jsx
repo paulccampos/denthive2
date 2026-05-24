@@ -90,11 +90,20 @@ export default function HtmlLikeShell({ variant, userName, children }) {
           <span className="material-symbols-outlined hover:bg-surface-container-high p-sm rounded-full transition-colors">
             schedule
           </span>
-          <img
-            alt="User Profile"
-            className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_srj4M-Dez6F1shmpEB2L08Ni-fpKQiG4umnCzDfsDzBw7JApeHB9E6kdHP7H7IedQZjWxsEFv9fBnZBt8tiYde2V490-i5zEECtlAOCuz_OqSSxQ4Zm2wxvCkIwf00bX_aEcVE6saTsvLaDYPLpblgOlTIYL22S0SSgBF-v_w7spnQqW8uQ0ChnQW1R-LWP2Dx7ThxZGQXey_k08agDuAKd3C-rXZTUr1A6ORsnQybTzQRHgmgbeOhdgTAhO4fvAKYP5GcAaBPms"
-          />
+          <div
+            className="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant flex items-center justify-center font-bold text-xs"
+            aria-label="User initials"
+            title={userName || 'User'}
+          >
+            {(() => {
+              const name = (userName || '').trim();
+              if (!name) return '?';
+              const parts = name.split(/\s+/).filter(Boolean);
+              const a = parts[0]?.[0] || '';
+              const b = parts.length > 1 ? parts[parts.length - 1]?.[0] : (parts[0]?.[1] || '');
+              return (a + b).toUpperCase();
+            })()}
+          </div>
         </div>
       </header>
 
