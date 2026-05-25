@@ -1,0 +1,47 @@
+[
+  {
+    "_id": "665000000000000000000001",
+    "email": "admin@denthive.local",
+    "username": "admin",
+    "role": "admin",
+    "active": true,
+    "patientId": null,
+    "passwordHash": "<bcrypt-hash-set-by-backend-seed.js>",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "665000000000000000000002",
+    "email": "secretary@denthive.local",
+    "username": "secretary",
+    "role": "secretary",
+    "active": true,
+    "patientId": null,
+    "passwordHash": "<bcrypt-hash-set-by-backend-seed.js>",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "665000000000000000000003",
+    "email": "doctor@denthive.local",
+    "username": "doctor",
+    "role": "doctor",
+    "active": true,
+    "patientId": null,
+    "passwordHash": "<bcrypt-hash-set-by-backend-seed.js>",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "665000000000000000000004",
+    "email": "patient@denthive.local",
+    "username": "patient",
+    "role": "patient",
+    "active": true,
+    "patientId": "665000000000000000000010",
+    "passwordHash": "<bcrypt-hash-set-by-backend-seed.js>",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  }
+]
+

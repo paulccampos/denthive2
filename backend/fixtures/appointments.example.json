@@ -1,0 +1,33 @@
+[
+  {
+    "_id": "665000000000000000000020",
+    "patientId": "665000000000000000000010",
+    "patientNameSnapshot": "Demo Patient",
+    "serviceType": "Dental Checkup",
+    "preferredDoctor": "Dr. Sarah Chen",
+    "scheduledAt": "2026-06-01T09:30:00.000Z",
+    "toothFlags": ["Upper 1", "Lower 3"],
+    "createdByUserId": "665000000000000000000002",
+    "status": "waiting",
+    "checkedInAt": null,
+    "completedAt": null,
+    "createdAt": "2026-05-20T00:00:00.000Z",
+    "updatedAt": "2026-05-20T00:00:00.000Z"
+  },
+  {
+    "_id": "665000000000000000000021",
+    "patientId": "665000000000000000000011",
+    "patientNameSnapshot": "Ava Martinez",
+    "serviceType": "Tooth Extraction Consultation",
+    "preferredDoctor": "Dr. Sarah Chen",
+    "scheduledAt": "2026-06-01T10:15:00.000Z",
+    "toothFlags": ["Lower 7"],
+    "createdByUserId": "665000000000000000000002",
+    "status": "scheduled",
+    "checkedInAt": null,
+    "completedAt": null,
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "updatedAt": "2026-05-21T00:00:00.000Z"
+  }
+]
+

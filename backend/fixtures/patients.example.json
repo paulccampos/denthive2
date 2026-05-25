@@ -1,0 +1,41 @@
+[
+  {
+    "_id": "665000000000000000000010",
+    "denthivePatientId": "DC-0001",
+    "firstName": "Demo",
+    "lastName": "Patient",
+    "email": "patient@denthive.local",
+    "phone": "+1 555 000 0000",
+    "address": "123 Demo Street",
+    "dob": "1995-04-20T00:00:00.000Z",
+    "gender": "unspecified",
+    "allergies": ["none"],
+    "medications": [],
+    "chronicConditions": ["none"],
+    "outstandingBalance": 0,
+    "status": "active",
+    "userId": "665000000000000000000004",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "665000000000000000000011",
+    "denthivePatientId": "DC-0002",
+    "firstName": "Ava",
+    "lastName": "Martinez",
+    "email": "ava.martinez@example.com",
+    "phone": "+1 555 123 4567",
+    "address": "55 Harbor Ave",
+    "dob": "1989-11-02T00:00:00.000Z",
+    "gender": "female",
+    "allergies": ["penicillin"],
+    "medications": ["ibuprofen"],
+    "chronicConditions": ["asthma"],
+    "outstandingBalance": 120,
+    "status": "pending",
+    "userId": null,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  }
+]
+

@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "665000000000000000000030",
+    "patientId": "665000000000000000000010",
+    "appointmentId": "665000000000000000000020",
+    "procedures": [
+      {
+        "tooth": "Upper 1",
+        "procedure": "Scaling",
+        "extracted": false
+      },
+      {
+        "tooth": "Lower 3",
+        "procedure": "Fluoride treatment",
+        "extracted": false
+      }
+    ],
+    "consultationNotes": "Patient reports mild sensitivity. Recommended routine cleaning and fluoride.",
+    "createdByUserId": "665000000000000000000003",
+    "createdByRole": "doctor",
+    "status": "completed",
+    "createdAt": "2026-06-01T10:00:00.000Z",
+    "updatedAt": "2026-06-01T10:00:00.000Z"
+  }
+]
+
