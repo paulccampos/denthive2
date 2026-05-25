@@ -1,0 +1,88 @@
+[{
+  "_id": {
+    "$oid": "6a13bd0d61f596627c2bcbf2"
+  },
+  "email": "jane@email.com",
+  "username": "",
+  "passwordHash": "$2a$10$jZ4Q/tdmqikMd2SB/N0ShOEc6GsyUcK54wmVtfAwcQITX8ehjDmcm",
+  "role": "patient",
+  "active": true,
+  "patientId": {
+    "$oid": "6a13bd0d61f596627c2bcbf0"
+  },
+  "createdAt": {
+    "$date": "2026-05-25T03:07:57.260Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-25T03:07:57.260Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a146f6d37d65219fdd021fd"
+  },
+  "email": "admin@denthive.local",
+  "username": "admin",
+  "passwordHash": "$2a$10$sBTrhHbjkt6JfFXkwUpJOug03.OjxatwezmZgaYJEwdBGiwwNN5zu",
+  "role": "admin",
+  "active": true,
+  "createdAt": {
+    "$date": "2026-05-25T15:49:01.064Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-25T16:00:28.880Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a146f6d37d65219fdd02201"
+  },
+  "email": "secretary@denthive.local",
+  "username": "secretary",
+  "passwordHash": "$2a$10$zg7qCIM/vADqho9O5fsy5.0Iq4BIB4gcB2gMi6R4cVpicjgAOJXWC",
+  "role": "secretary",
+  "active": true,
+  "createdAt": {
+    "$date": "2026-05-25T15:49:01.147Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-25T16:00:28.956Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a146f6d37d65219fdd02205"
+  },
+  "email": "doctor@denthive.local",
+  "username": "doctor",
+  "passwordHash": "$2a$10$/YQ8FFdyRK325ZfcIWDprOjMAdolqAYQDHz1oueZ6EpFEbt/LozN.",
+  "role": "doctor",
+  "active": true,
+  "createdAt": {
+    "$date": "2026-05-25T15:49:01.223Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-25T16:00:29.034Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1471614c4ea17a42cd0d01"
+  },
+  "email": "doc@doc.com",
+  "username": "do",
+  "passwordHash": "$2a$10$DKyauf9BW7mO8N1x60SEqevkuAkYRgPdbENoA3MoDpeG4U5aR8KqG",
+  "role": "doctor",
+  "active": true,
+  "createdAt": {
+    "$date": "2026-05-25T15:57:21.107Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-25T15:57:21.107Z"
+  },
+  "__v": 0
+}]
