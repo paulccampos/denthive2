@@ -21,7 +21,18 @@ router.post('/register', async (req, res) => {
 
     if (!email && !username) return res.status(400).json({ error: 'Provide email or username' });
 
+    // Normalize email: users should be able to login reliably using email.
+    // Also prevents “email.com” / casing / whitespace issues.
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : email;
+    const normalizedUsername = typeof username === 'string' ? username.trim() : username;
+
+    // Enforce your current rule: emails must end with "email.com" (if email provided)
+    if (normalizedEmail && !normalizedEmail.endsWith('email.com')) {
+      return res.status(400).json({ error: 'Email must end with email.com' });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
+
 
     // generate denthivePatientId using count of patients
     const total = await Patient.countDocuments();
@@ -61,21 +72,64 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { identity, password } = req.body || {};
+    const { identity, password, role } = req.body || {};
     if (!identity || !password) return res.status(400).json({ error: 'Missing identity/password' });
+
+    const normalizedIdentity = typeof identity === 'string' ? identity.trim() : identity;
+    const identityEmail = typeof normalizedIdentity === 'string' ? normalizedIdentity.toLowerCase() : normalizedIdentity;
+    const identityUsername = typeof normalizedIdentity === 'string' ? normalizedIdentity : normalizedIdentity;
 
     const q = { active: true };
     const user =
-      (await User.findOne({ ...q, email: identity })) ||
-      (await User.findOne({ ...q, username: identity }));
+      (await User.findOne({ ...q, email: identityEmail })) ||
+      (await User.findOne({ ...q, username: identityUsername }));
 
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      // If client provides a staff role, auto-create the staff user (signup-like) and then sign in.
+      const allowedRoles = ['doctor', 'secretary', 'admin'];
+      if (role && allowedRoles.includes(role)) {
+        const normalizedEmail = typeof identityEmail === 'string' ? identityEmail.trim().toLowerCase() : identityEmail;
+        const normalizedUsername = typeof identityUsername === 'string' ? identityUsername.trim() : identityUsername;
 
-    const ok = await bcrypt.compare(password, user.passwordHash);
+        // Keep signup rule consistent: if login value looks like an email, enforce it.
+        if (typeof normalizedEmail === 'string' && normalizedEmail.includes('@') && !normalizedEmail.endsWith('email.com')) {
+          return res.status(400).json({ error: 'Email must end with email.com' });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+          email: typeof normalizedEmail === 'string' && normalizedEmail.includes('@') ? normalizedEmail : undefined,
+          username: typeof normalizedUsername === 'string' ? normalizedUsername : undefined,
+          passwordHash,
+          role,
+          active: true,
+        });
+
+        return res.json({ token: signToken(newUser), role: newUser.role, userId: newUser._id });
+      }
+
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Support both bcrypt hashes and plain-text passwords (for cases where DB was edited manually)
+    let ok = false;
+    const stored = user.passwordHash || '';
+    const looksLikeBcryptHash = typeof stored === 'string' && stored.startsWith('$2');
+
+    if (looksLikeBcryptHash) {
+      ok = await bcrypt.compare(password, stored);
+    } else {
+      ok = password === stored;
+    }
+
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 
     return res.json({ token: signToken(user), role: user.role, userId: user._id });
   } catch (e) {
+    if (String(e).includes('duplicate key')) {
+      return res.status(409).json({ error: 'User already exists' });
+    }
     return res.status(500).json({ error: 'Login failed' });
   }
 });

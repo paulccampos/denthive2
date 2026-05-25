@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import CreateStaffFromLogin from './CreateStaffFromLogin'
 
 export default function Login() {
+
   const [identity, setIdentity] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -81,6 +83,7 @@ export default function Login() {
             </header>
 
             <form className="space-y-md" id="loginForm" onSubmit={onSubmit}>
+
               <div className="space-y-xs">
                 <label className="font-label-caps text-label-caps text-outline block" htmlFor="identity">
                   USERNAME OR EMAIL
@@ -142,11 +145,15 @@ export default function Login() {
                 >
                   Create Patient Account
                 </button>
+
+                {/* Removed staff creation-from-login UI */}
+
               </div>
             </form>
 
             <footer className="mt-xl">
               <p className="font-body-sm text-body-sm text-on-surface-variant text-center">
+
                 Securely managed by DentHive Systems © 2024.
                 <br />
                 <button id="privacyPolicyLink" className="text-primary underline" type="button" onClick={() => setShowDemo((s) => !s)}>
@@ -161,9 +168,13 @@ export default function Login() {
 
             {showDemo ? demoBlock : null}
           </div>
+
+
         </section>
 
+
         <section className="hidden md:block md:w-1/2 lg:w-3/5 bg-surface-container relative overflow-hidden">
+
           <img
             className="w-full h-full object-cover"
             alt="Dental clinic"

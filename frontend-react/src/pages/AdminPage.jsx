@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { apiFetch } from '../lib/api'
+import CreateStaff from './CreateStaff'
 
 export default function AdminPage() {
   const [users, setUsers] = useState([])
 
+  async function loadUsers() {
+    try {
+      const resp = await apiFetch('/admin/users')
+      const data = await resp.json()
+      if (resp.ok) setUsers(data.users || data)
+    } catch {}
+  }
 
   useEffect(() => {
-    ;(async () => {
-      try {
-        const resp = await apiFetch('/admin/users')
-        const data = await resp.json()
-        if (resp.ok) setUsers(data.users || data)
-      } catch {}
-    })()
+    loadUsers()
   }, [])
 
   return (
@@ -36,11 +38,23 @@ export default function AdminPage() {
           </div>
         </nav>
         <div className="mt-auto border-t border-outline-variant p-sm space-y-1">
+          <button
+            type="button"
+            className="w-full bg-secondary text-on-secondary py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:opacity-90 transition-all active:scale-95"
+            onClick={() => {
+              const el = document.getElementById('create-staff-section')
+              el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+          >
+            <span className="material-symbols-outlined">person_add</span>
+            Create Staff
+          </button>
           <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="#">
             <span className="material-symbols-outlined">settings</span>
             <span className="font-label-caps text-label-caps uppercase">Settings</span>
           </a>
         </div>
+
       </aside>
 
       <main className="ml-64 flex-grow min-h-screen">
@@ -76,11 +90,14 @@ export default function AdminPage() {
               <h3 className="font-title-sm text-title-sm text-on-surface">Staff Directory</h3>
               <p className="font-body-sm text-body-sm text-outline">Manage roles and permissions for clinic members.</p>
             </div>
-            <button type="button" className="bg-secondary text-on-secondary px-lg py-sm rounded-lg flex items-center gap-xs font-title-sm text-title-sm hover:opacity-90 transition-all active:scale-95">
-              <span className="material-symbols-outlined">person_add</span>
-              Add New User
-            </button>
+            <div className="text-on-surface-variant font-body-sm">Only visible to admins.</div>
           </section>
+
+          <section id="create-staff-section">
+            <CreateStaff onCreated={loadUsers} />
+          </section>
+
+
 
           <section className="flat-card rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
