@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../lib/api'
 
 const TEETH = ['Upper 1', 'Upper 2', 'Upper 3', 'Upper 4', 'Upper 5', 'Upper 16', 'Upper 15', 'Upper 14', 'Upper 13', 'Upper 12', 'Upper 11', 'Upper 10', 'Upper 9', 'Upper 8', 'Upper 7', 'Upper 6', 'Lower 1', 'Lower 2', 'Lower 3', 'Lower 4', 'Lower 5', 'Lower 16', 'Lower 15', 'Lower 14', 'Lower 13', 'Lower 12', 'Lower 11', 'Lower 10', 'Lower 9', 'Lower 8', 'Lower 7', 'Lower 6']
@@ -157,6 +157,16 @@ export default function Booking() {
     fetchPriceForReason(reason)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Load availability for the currently selected date/doctor.
+  // Booking page uses authenticated backend endpoint.
+  useEffect(() => {
+    // Only try if we have a token; otherwise keep UI interactive but unauthenticated.
+    if (!token) return
+    fetchAvailability()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, selectedDate?.day, calendarMonth, calendarYear, doctor])
+
 
   return (
     <div className="bg-background text-on-background overflow-x-hidden">
