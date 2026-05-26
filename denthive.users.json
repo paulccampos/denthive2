@@ -24,14 +24,14 @@
   },
   "email": "admin@denthive.local",
   "username": "admin",
-  "passwordHash": "$2a$10$sBTrhHbjkt6JfFXkwUpJOug03.OjxatwezmZgaYJEwdBGiwwNN5zu",
+  "passwordHash": "$2a$10$vM0MM8V.N/a//lsjxvDU7.UOTAwmHlbqxcGpk4nNqIBXBS/q3okUm",
   "role": "admin",
   "active": true,
   "createdAt": {
     "$date": "2026-05-25T15:49:01.064Z"
   },
   "updatedAt": {
-    "$date": "2026-05-25T16:00:28.880Z"
+    "$date": "2026-05-26T05:01:37.470Z"
   },
   "__v": 0
 },
@@ -41,14 +41,14 @@
   },
   "email": "secretary@denthive.local",
   "username": "secretary",
-  "passwordHash": "$2a$10$zg7qCIM/vADqho9O5fsy5.0Iq4BIB4gcB2gMi6R4cVpicjgAOJXWC",
+  "passwordHash": "$2a$10$C9W33g58/tClBf.EorV99.cxop/7IpFlxpzYeSLd2kHAc6PisXqzm",
   "role": "secretary",
   "active": true,
   "createdAt": {
     "$date": "2026-05-25T15:49:01.147Z"
   },
   "updatedAt": {
-    "$date": "2026-05-25T16:00:28.956Z"
+    "$date": "2026-05-26T05:01:37.549Z"
   },
   "__v": 0
 },
@@ -58,14 +58,14 @@
   },
   "email": "doctor@denthive.local",
   "username": "doctor",
-  "passwordHash": "$2a$10$/YQ8FFdyRK325ZfcIWDprOjMAdolqAYQDHz1oueZ6EpFEbt/LozN.",
+  "passwordHash": "$2a$10$cKwdkvEvaqX1BsrsmYajP.outwLmwxb0XO0jmj.FnK1WusEe5oJ7.",
   "role": "doctor",
   "active": true,
   "createdAt": {
     "$date": "2026-05-25T15:49:01.223Z"
   },
   "updatedAt": {
-    "$date": "2026-05-25T16:00:29.034Z"
+    "$date": "2026-05-26T05:01:37.621Z"
   },
   "__v": 0
 },
