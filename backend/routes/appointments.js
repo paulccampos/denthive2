@@ -78,6 +78,100 @@ router.get('/availability', requireAuth(['patient', 'secretary', 'admin', 'docto
   }
 });
 
+// Get authenticated patient's appointments (bookings)
+router.get('/me', requireAuth(['patient']), async (req, res) => {
+  try {
+    const patient = await Patient.findOne({ userId: req.auth.sub });
+    if (!patient) return res.status(400).json({ error: 'Patient profile not found' });
+
+    const appts = await Appointment.find({ patientId: patient._id })
+      .sort({ scheduledAt: -1 })
+      .lean();
+
+    return res.json({ appointments: appts });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to load appointments' });
+  }
+});
+
+// List appointments/bookings (doctor/secretary/admin)
+router.get('/', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) => {
+  try {
+    const status = req.query.status
+
+    const filter = status
+      ? { status }
+      : { status: { $in: ['waiting', 'scheduled', 'calling', 'in_progress'] } }
+
+    const items = await Appointment.find(filter).sort({ scheduledAt: 1 }).limit(200).lean()
+
+    // enrich with patient denthive id + snapshot fields
+    const enriched = await Promise.all(
+      items.map(async (a) => {
+        const patient = a.patientId ? await Patient.findById(a.patientId).select('denthivePatientId').lean() : null
+        return {
+          ...a,
+          patientDentId: patient?.denthivePatientId || null,
+          patientName: a.patientNameSnapshot || null,
+        }
+      })
+    )
+
+    return res.json({ appointments: enriched })
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to load appointments' })
+  }
+})
+
+// Update appointment status and/or reschedule (doctor/secretary/admin)
+router.patch('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) => {
+  try {
+    const { status, scheduledAt } = req.body || {}
+
+    if (!status && !scheduledAt) {
+      return res.status(400).json({ error: 'Missing status and/or scheduledAt' })
+    }
+
+    const appt = await Appointment.findById(req.params.id)
+    if (!appt) return res.status(404).json({ error: 'Appointment not found' })
+
+    // If rescheduling, run conflict check similar to create.
+    if (scheduledAt) {
+      const newDate = new Date(scheduledAt)
+      if (Number.isNaN(newDate.getTime())) return res.status(400).json({ error: 'Invalid scheduledAt' })
+
+      const conflict = await Appointment.findOne({
+        _id: { $ne: appt._id },
+        scheduledAt: newDate,
+        status: { $in: BLOCKING_STATUSES },
+        ...(appt.preferredDoctor ? { preferredDoctor: appt.preferredDoctor } : {}),
+      })
+
+      if (conflict) return res.status(409).json({ error: 'Selected time is no longer available' })
+
+      appt.scheduledAt = newDate
+
+      // If appointment is moved to another time, keep it in waiting unless explicitly setting status.
+      if (!status) appt.status = 'waiting'
+    }
+
+    if (status) {
+      appt.status = status
+      if (status === 'calling') appt.checkedInAt = new Date()
+      if (status === 'completed') appt.completedAt = new Date()
+      if (status === 'canceled') {
+        // keep historical timestamps as-is
+      }
+    }
+
+    await appt.save()
+
+    return res.json({ appointment: appt })
+  } catch (e) {
+    return res.status(500).json({ error: 'Update appointment failed' })
+  }
+})
+
 router.post('/', requireAuth(['patient']), async (req, res) => {
   try {
     const { serviceType, preferredDoctor, scheduledAt, toothFlags = [] } = req.body || {};

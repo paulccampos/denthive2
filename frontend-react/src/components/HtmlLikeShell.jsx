@@ -14,17 +14,17 @@ export default function HtmlLikeShell({ variant, userName, children }) {
       { to: '/queuemanagement', icon: 'group', label: 'Queue', exact: false },
       { to: '/registry', icon: 'folder_shared', label: 'Patients', exact: false },
       { to: '/bookingpage', icon: 'calendar_month', label: 'Schedule', exact: false },
-      { to: '/queue', icon: 'inventory_2', label: 'Inventory', exact: false },
+      { to: '/doctorbookings', icon: 'folder_shared', label: 'Bookings', exact: false },
     ],
     secretary: [
-      { to: '/queuemanagement', icon: 'group', label: 'Queue', exact: true },
+      { to: '/secretarybookings', icon: 'folder_shared', label: 'Bookings', exact: true },
+      { to: '/queuemanagement', icon: 'group', label: 'Queue', exact: false },
       { to: '/registry', icon: 'folder_shared', label: 'Patients', exact: false },
       { to: '/bookingpage', icon: 'calendar_month', label: 'Schedule', exact: false },
-      { to: '/patientdashboard', icon: 'dashboard', label: 'Dashboard', exact: false },
     ],
     patient: [
-      { to: '/bookingpage', icon: 'calendar_month', label: 'Book Appointment', exact: true },
-      { to: '/patientdashboard', icon: 'dashboard', label: 'Dashboard', exact: false },
+      { to: '/bookingpage', icon: 'calendar_month', label: 'Book Appointment', exact: false },
+      { to: '/patientdashboard', icon: 'dashboard', label: 'Bookings', exact: true },
       { to: '/registry', icon: 'folder_shared', label: 'Records', exact: false },
     ],
   }

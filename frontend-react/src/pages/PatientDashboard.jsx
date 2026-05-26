@@ -3,7 +3,7 @@ import { apiFetch } from '../lib/api'
 
 export default function PatientDashboard() {
   const [patient, setPatient] = useState(null)
-
+  const [appointments, setAppointments] = useState([])
 
   useEffect(() => {
     ;(async () => {
@@ -11,6 +11,16 @@ export default function PatientDashboard() {
         const resp = await apiFetch('/patients/me')
         const data = await resp.json()
         if (resp.ok) setPatient(data)
+      } catch {}
+    })()
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const resp = await apiFetch('/appointments/me')
+        const data = await resp.json()
+        if (resp.ok) setAppointments(data.appointments || [])
       } catch {}
     })()
   }, [])
@@ -27,18 +37,18 @@ export default function PatientDashboard() {
             <p className="font-label-caps text-label-caps text-outline">Dental Management</p>
           </div>
         </div>
-        <nav className="flex-1 mt-md space-y-xs px-sm">
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="#">
-            <span className="material-symbols-outlined">dashboard</span>
-            <span className="font-label-caps text-label-caps">Dashboard</span>
-          </a>
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="#">
-            <span className="material-symbols-outlined">group</span>
-            <span className="font-label-caps text-label-caps">Queue</span>
-          </a>
+                <nav className="flex-1 mt-md space-y-xs px-sm">
           <a className="bg-primary-container text-on-primary-container font-bold px-md py-sm flex items-center gap-sm rounded-lg border-r-4 border-primary transition-all" href="#">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>folder_shared</span>
-            <span className="font-label-caps text-label-caps">Patients</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
+            <span className="font-label-caps text-label-caps">Bookings</span>
+          </a>
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/bookingpage">
+            <span className="material-symbols-outlined">calendar_month</span>
+            <span className="font-label-caps text-label-caps">Book Appointment</span>
+          </a>
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/registry">
+            <span className="material-symbols-outlined">folder_shared</span>
+            <span className="font-label-caps text-label-caps">Records</span>
           </a>
         </nav>
         <div className="mt-auto border-t border-outline-variant px-sm py-md">
@@ -130,12 +140,20 @@ export default function PatientDashboard() {
               </div>
             </div>
 
-            <div className="lg:col-span-8 glass-card rounded-xl p-lg">
+              <div className="lg:col-span-8 glass-card rounded-xl p-lg">
               <div className="flex items-center justify-between mb-lg">
                 <h3 className="font-headline-md text-headline-md">Treatment History & Queue</h3>
                 <div className="flex gap-sm">
-                  <span className="px-sm py-xs bg-secondary-container text-on-secondary-container rounded-full font-label-caps text-label-caps">COMPLETED: 12</span>
-                  <span className="px-sm py-xs bg-primary-fixed text-primary rounded-full font-label-caps text-label-caps">PENDING: 2</span>
+                  {(() => {
+                    const completedCount = appointments.filter((a) => a.status === 'completed').length
+                    const pendingCount = appointments.filter((a) => a.status === 'waiting' || a.status === 'scheduled' || a.status === 'calling' || a.status === 'in_progress').length
+                    return (
+                      <>
+                        <span className="px-sm py-xs bg-secondary-container text-on-secondary-container rounded-full font-label-caps text-label-caps">COMPLETED: {completedCount}</span>
+                        <span className="px-sm py-xs bg-primary-fixed text-primary rounded-full font-label-caps text-label-caps">PENDING: {pendingCount}</span>
+                      </>
+                    )
+                  })()}
                 </div>
               </div>
 
@@ -151,19 +169,44 @@ export default function PatientDashboard() {
                     </tr>
                   </thead>
                   <tbody className="font-body-md text-body-md">
-                    <tr className="hover:bg-surface-container-low transition-colors">
-                      <td className="py-md px-sm border-b border-outline-variant">Oct 12, 2023</td>
-                      <td className="py-md px-sm border-b border-outline-variant">Scaling & Polishing</td>
-                      <td className="py-md px-sm border-b border-outline-variant">Dr. Vance</td>
-                      <td className="py-md px-sm border-b border-outline-variant">
-                        <span className="px-sm py-xs bg-secondary text-white rounded-full font-label-caps text-[10px]">COMPLETED</span>
-                      </td>
-                      <td className="py-md px-sm border-b border-outline-variant text-right">
-                        <button type="button" className="text-primary hover:bg-primary-fixed p-xs rounded">
-                          <span className="material-symbols-outlined text-base">visibility</span>
-                        </button>
-                      </td>
-                    </tr>
+                    {appointments.length === 0 ? (
+                      <tr>
+                        <td className="py-md px-sm border-b border-outline-variant" colSpan="5">
+                          No appointments yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      appointments.map((a) => {
+                        const dateStr = a.scheduledAt ? new Date(a.scheduledAt).toLocaleString() : ''
+                        const status = (a.status || '').toUpperCase()
+                        const badgeClass =
+                          a.status === 'completed'
+                            ? 'bg-secondary text-white'
+                            : a.status === 'canceled'
+                              ? 'bg-error text-white'
+                              : 'bg-primary-container text-on-primary-container'
+
+                        return (
+                          <tr key={a._id || a.scheduledAt} className="hover:bg-surface-container-low transition-colors">
+                            <td className="py-md px-sm border-b border-outline-variant">{dateStr}</td>
+                            <td className="py-md px-sm border-b border-outline-variant">{a.serviceType || '-'}</td>
+                            <td className="py-md px-sm border-b border-outline-variant">{a.preferredDoctor || '-'}</td>
+                            <td className="py-md px-sm border-b border-outline-variant">
+                              <span className={`px-sm py-xs rounded-full font-label-caps text-[10px] ${badgeClass}`}>{status}</span>
+                            </td>
+                            <td className="py-md px-sm border-b border-outline-variant text-right">
+                              <button
+                                type="button"
+                                className="text-primary hover:bg-primary-fixed p-xs rounded"
+                                onClick={() => alert('Appointment details coming soon.')}
+                              >
+                                <span className="material-symbols-outlined text-base">visibility</span>
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -175,7 +218,7 @@ export default function PatientDashboard() {
                 </button>
                 <div className="flex gap-sm">
                   <button type="button" className="px-md py-sm border border-outline-variant rounded-lg font-title-sm hover:bg-surface-container transition-all">Archive Record</button>
-                  <button type="button" className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all">New Entry</button>
+                  <button type="button" className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={() => (window.location.href = '/bookingpage')}>New Booking</button>
                 </div>
               </div>
             </div>

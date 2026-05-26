@@ -8,6 +8,9 @@ import PatientDashboard from './pages/PatientDashboard.jsx'
 import QueueManagement from './pages/QueueManagement.jsx'
 import Registry from './pages/Registry.jsx'
 import AdminPage from './pages/AdminPage.jsx'
+import DoctorBookings from './pages/DoctorBookings.jsx'
+import SecretaryBookings from './pages/SecretaryBookings.jsx'
+
 
 export default function App() {
   return (
@@ -20,6 +23,9 @@ export default function App() {
       <Route path="/queuemanagement" element={<QueueManagement />} />
       <Route path="/registry" element={<Registry />} />
       <Route path="/adminpage" element={<AdminPage />} />
+      <Route path="/doctorbookings" element={<DoctorBookings />} />
+      <Route path="/secretarybookings" element={<SecretaryBookings />} />
+
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
