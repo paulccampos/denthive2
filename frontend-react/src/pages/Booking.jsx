@@ -48,6 +48,10 @@ export default function Booking() {
   const [availability, setAvailability] = useState([])
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
 
+  const [pricePHP, setPricePHP] = useState(null)
+  const [priceLoading, setPriceLoading] = useState(false)
+
+
   function toISODate(dateNumber) {
     // Convert selectedDate.day within current calendarMonth/year to YYYY-MM-DD.
     // Note: Backend expects YYYY-MM-DD and treats it as UTC day boundaries.
@@ -55,8 +59,25 @@ export default function Booking() {
     return `${calendarYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(dateNumber).padStart(2, '0')}`
   }
 
+  async function fetchPriceForReason(reasonValue) {
+    try {
+      setPriceLoading(true)
+      const resp = await apiFetch(`/prices?serviceType=${encodeURIComponent(reasonValue || '')}`)
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data.error || 'Failed to load price')
+
+      const price = (data.prices && data.prices[0]) || null
+      setPricePHP(price?.pricePHP ?? null)
+    } catch {
+      // keep price as-is
+    } finally {
+      setPriceLoading(false)
+    }
+  }
+
   async function fetchAvailability() {
     try {
+
       if (!selectedDate?.day) return
       setAvailabilityLoading(true)
       const dateStr = toISODate(selectedDate.day)
@@ -131,6 +152,12 @@ export default function Booking() {
     }
   }
 
+  // Load initial price
+  useEffect(() => {
+    fetchPriceForReason(reason)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <div className="bg-background text-on-background overflow-x-hidden">
       <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
@@ -160,6 +187,19 @@ export default function Booking() {
                   01. VISIT DETAILS
                 </h3>
 
+                <div className="mb-md text-on-surface-variant text-xs">
+                  {priceLoading ? (
+                    <span>Loading estimated price...</span>
+                  ) : pricePHP != null ? (
+                    <span>
+                      Estimated price: <span className="font-bold">₱{Number(pricePHP).toLocaleString('en-PH')}</span>
+                    </span>
+                  ) : (
+                    <span>Estimated price: (not available)</span>
+                  )}
+                </div>
+
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
                   <div className="space-y-xs">
                     <label className="font-label-caps text-on-surface-variant block ml-xs">Reason for Visit</label>
@@ -167,7 +207,11 @@ export default function Booking() {
                       <select
                         className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
                         value={reason}
-                        onChange={(e) => setReason(e.target.value)}
+                        onChange={(e) => {
+                          const next = e.target.value
+                          setReason(next)
+                          fetchPriceForReason(next)
+                        }}
                       >
                         <option>General Checkup</option>
                         <option>Dental Cleaning</option>

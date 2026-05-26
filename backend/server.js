@@ -9,6 +9,8 @@ const { appointmentsRouter } = require('./routes/appointments');
 const { queueRouter } = require('./routes/queue');
 const { clinicalRouter } = require('./routes/clinical');
 const { adminRouter } = require('./routes/admin');
+const { pricesRouter } = require('./routes/prices');
+
 
 const app = express();
 
@@ -55,7 +57,9 @@ async function start() {
   app.use('/api/appointments', appointmentsRouter);
   app.use('/api/queue', queueRouter);
   app.use('/api/clinical-records', clinicalRouter);
+  app.use('/api/prices', pricesRouter);
   app.use('/api/admin', adminRouter);
+
 
 
   // seed default users (non-blocking: never prevent server startup)

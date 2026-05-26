@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const Patient = require('./models/Patient');
+const ProcedurePrice = require('./models/ProcedurePrice');
 
 async function seedDefaults() {
   const defaults = [
@@ -101,10 +102,29 @@ async function seedDefaults() {
     ],
   };
 
+  // Seed common Philippines (Peso) estimates tied to Appointment.serviceType
+  const priceSeed = [
+    { serviceType: 'General Checkup', pricePHP: 800, description: 'Initial consultation and basic exam', isCommon: true },
+    { serviceType: 'Dental Cleaning', pricePHP: 1200, description: 'Scaling, polishing, and oral hygiene session', isCommon: true },
+    { serviceType: 'Tooth Extraction', pricePHP: 2500, description: 'Simple extraction estimate', isCommon: false },
+    { serviceType: 'Root Canal', pricePHP: 5500, description: 'Per tooth estimate (varies by complexity)', isCommon: false },
+    { serviceType: 'Orthodontic Consult', pricePHP: 1500, description: 'Assessment for braces/aligners', isCommon: true },
+    { serviceType: 'Teeth Whitening', pricePHP: 4500, description: 'In-office whitening estimate', isCommon: false },
+  ];
+
+  for (const p of priceSeed) {
+    await ProcedurePrice.findOneAndUpdate(
+      { serviceType: p.serviceType },
+      { $set: p },
+      { upsert: true, new: true }
+    );
+  }
+
   // eslint-disable-next-line no-console
   console.log('[DentHive] Seeded login accounts (all password: patient1)');
   console.log(JSON.stringify(seeded, null, 2));
 }
+
 
 module.exports = { seedDefaults };
 
