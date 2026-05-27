@@ -80,9 +80,20 @@ router.post('/login', async (req, res) => {
     const identityUsername = typeof normalizedIdentity === 'string' ? normalizedIdentity : normalizedIdentity;
 
     const q = { active: true };
+
+    // Debug (no password logging): verify identity received + what lookup matched
+    console.log('[DentHive][Auth] login identity:', {
+      identity: normalizedIdentity,
+      emailLookup: identityEmail,
+      usernameLookup: identityUsername,
+    });
+
     const user =
       (await User.findOne({ ...q, email: identityEmail })) ||
       (await User.findOne({ ...q, username: identityUsername }));
+
+    console.log('[DentHive][Auth] user found:', !!user, user ? { id: user._id.toString(), role: user.role, active: user.active } : null);
+
 
     if (!user) {
       // If client provides a staff role, auto-create the staff user (signup-like) and then sign in.
@@ -112,16 +123,52 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Support both bcrypt hashes and plain-text passwords (for cases where DB was edited manually)
+    // Password acceptance rules for this app:
+    // 1) If DB stores a bcrypt hash => bcrypt.compare(plainProvided, storedHash)
+    // 2) If DB stores plain text => plain compare
+    // 3) If the provided password itself is a bcrypt hash, we ALSO allow:
+    //    - bcrypt.compare(providedHash, storedHash) (best-effort)
+    //    - direct equality (in case someone inserted hashes as plain strings)
     let ok = false;
     const stored = user.passwordHash || '';
-    const looksLikeBcryptHash = typeof stored === 'string' && stored.startsWith('$2');
+    const provided = typeof password === 'string' ? password : '';
 
-    if (looksLikeBcryptHash) {
-      ok = await bcrypt.compare(password, stored);
+    const storedLooksLikeBcrypt = typeof stored === 'string' && stored.startsWith('$2');
+    const providedLooksLikeBcrypt = typeof provided === 'string' && provided.startsWith('$2');
+
+    if (storedLooksLikeBcrypt) {
+      // Normal case: plain password against bcrypt hash
+      ok = await bcrypt.compare(provided, stored);
+
+      // If caller provided a bcrypt hash string, try to match hash-to-hash.
+      if (!ok && providedLooksLikeBcrypt) {
+        // Common case: stored hash equals provided hash.
+        if (provided === stored) ok = true;
+        // Best-effort fallback: bcrypt.compare(hashString, storedHash)
+        if (!ok) ok = await bcrypt.compare(provided, stored);
+      }
     } else {
-      ok = password === stored;
+      // Plain-text password stored
+      ok = provided === stored;
+
+      // If stored was plain text but someone inserted a bcrypt hash as the plaintext,
+      // allow direct equality already covered above.
+      if (!ok && providedLooksLikeBcrypt && storedLooksLikeBcrypt) {
+        ok = await bcrypt.compare(provided, stored);
+      }
     }
+
+    // Extra safe-guard diagnostics (without leaking passwords)
+    // eslint-disable-next-line no-console
+    console.log('[DentHive][Auth] password check:', {
+      storedLooksLikeBcrypt,
+      providedLooksLikeBcrypt,
+      ok,
+      userId: user._id.toString(),
+      role: user.role,
+    });
+
+
 
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 

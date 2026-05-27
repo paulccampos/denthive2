@@ -105,17 +105,43 @@ router.get('/', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) 
 
     const items = await Appointment.find(filter).sort({ scheduledAt: 1 }).limit(200).lean()
 
-    // enrich with patient denthive id + snapshot fields
+    // enrich with full patient info (for secretary UI)
     const enriched = await Promise.all(
       items.map(async (a) => {
-        const patient = a.patientId ? await Patient.findById(a.patientId).select('denthivePatientId').lean() : null
+        const patient = a.patientId
+          ? await Patient.findById(a.patientId)
+              .select(
+                'denthivePatientId firstName lastName email phone address dob gender allergies medications chronicConditions outstandingBalance status userId'
+              )
+              .lean()
+          : null
+
         return {
           ...a,
           patientDentId: patient?.denthivePatientId || null,
           patientName: a.patientNameSnapshot || null,
+          patient: patient
+            ? {
+                denthivePatientId: patient.denthivePatientId,
+                firstName: patient.firstName,
+                lastName: patient.lastName,
+                email: patient.email,
+                phone: patient.phone,
+                address: patient.address,
+                dob: patient.dob,
+                gender: patient.gender,
+                allergies: patient.allergies || [],
+                medications: patient.medications || [],
+                chronicConditions: patient.chronicConditions || [],
+                outstandingBalance: patient.outstandingBalance ?? 0,
+                status: patient.status,
+                userId: patient.userId,
+              }
+            : null,
         }
       })
     )
+
 
     return res.json({ appointments: enriched })
   } catch (e) {
@@ -171,6 +197,23 @@ router.patch('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req, 
     return res.status(500).json({ error: 'Update appointment failed' })
   }
 })
+
+// Delete appointment (secretary/admin/doctor): mark as canceled and remove from queue.
+router.delete('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) => {
+  try {
+    const appt = await Appointment.findById(req.params.id);
+    if (!appt) return res.status(404).json({ error: 'Appointment not found' });
+
+    // Soft-delete with status=archived to keep history.
+    appt.status = 'archived';
+    await appt.save();
+
+    return res.json({ appointment: appt });
+  } catch (e) {
+    return res.status(500).json({ error: 'Delete appointment failed' });
+  }
+});
+
 
 router.post('/', requireAuth(['patient']), async (req, res) => {
   try {

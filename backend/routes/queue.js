@@ -11,8 +11,10 @@ router.get('/', requireAuth(['secretary', 'admin', 'doctor']), async (req, res) 
     const filter = status ? { status } : { status: { $in: ['waiting', 'calling'] } };
 
     const items = await Appointment.find(filter)
-      .sort({ scheduledAt: 1 })
+      // Prefer queuePosition when present; fallback to scheduledAt.
+      .sort({ queuePosition: 1, scheduledAt: 1 })
       .limit(100);
+
 
     const enriched = await Promise.all(
       items.map(async (a) => {
@@ -67,5 +69,29 @@ router.post('/:id/complete', requireAuth(['secretary', 'admin']), async (req, re
   }
 });
 
+// Reorder queue via drag/drop.
+// Body: { ids: [appointmentId1, appointmentId2, ...] }
+router.patch('/reorder', requireAuth(['secretary', 'admin']), async (req, res) => {
+  try {
+    const { ids } = req.body || {};
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Missing ids array' });
+    }
+
+    // Update queuePosition in the order provided.
+    const bulk = Appointment.collection.initializeUnorderedBulkOp();
+
+    ids.forEach((id, idx) => {
+      bulk.find({ _id: id }).updateOne({ $set: { queuePosition: idx + 1 } });
+    });
+
+    await bulk.execute();
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to reorder queue' });
+  }
+});
+
 module.exports = { queueRouter: router };
+
 

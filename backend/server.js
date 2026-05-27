@@ -26,7 +26,7 @@ app.use(
   })
 );
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 // MongoDB should be listening on localhost:27017 (Mongo default). Your original spec had 270127; keep env override support.
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
 
@@ -37,6 +37,15 @@ async function start() {
   await mongoose.connect(MONGO_URI, {
     dbName: DB_NAME,
   });
+
+  // Debug: confirm which MongoDB + database the API is actually connected to.
+  // This helps diagnose "invalid credentials" when editing users in a different DB.
+  const resolvedMongoUri = mongoose.connection.client?.s?.url || MONGO_URI;
+  const actualDbName = mongoose.connection?.db?.databaseName;
+  console.log('[DentHive][Mongo] MONGO_URI:', resolvedMongoUri);
+  console.log('[DentHive][Mongo] MONGO_DB (env):', DB_NAME);
+  console.log('[DentHive][Mongo] connected databaseName:', actualDbName);
+
 
   app.get('/health', (_req, res) => res.json({ ok: true }));
 
@@ -62,18 +71,11 @@ async function start() {
 
 
 
-  // seed default users (non-blocking: never prevent server startup)
-  try {
-    const { seedDefaults } = require('./seed');
-    await Promise.race([
-      seedDefaults(),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('seed timed out')), 15000)),
-    ]);
-  } catch (e) {
-    console.warn('[DentHive] Seed skipped/failed:', e?.message || e);
-  }
+  // NOTE: Seeding disabled by default.
+  // Login relies only on existing DB records.
 
   app.listen(PORT, () => {
+
     console.log(`[DentHive] API running at http://localhost:${PORT}`);
   });
 }

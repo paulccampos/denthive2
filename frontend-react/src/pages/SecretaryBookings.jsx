@@ -22,6 +22,9 @@ export default function SecretaryBookings() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState('waiting')
+  const [selected, setSelected] = useState(null)
+
+
 
   async function load() {
     setLoading(true)
@@ -78,6 +81,25 @@ export default function SecretaryBookings() {
       setLoading(false)
     }
   }
+
+  async function onDeleteAppointment(id) {
+    if (!confirm('Delete this booking?')) return
+    setLoading(true)
+    try {
+      const resp = await apiFetch(`/appointments/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data.error || 'Delete failed')
+      setSelected(null)
+      await load()
+    } catch (e) {
+      alert(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
 
   const timeLabels = useMemo(
     () => ['09:00 AM', '09:45 AM', '10:30 AM', '11:15 AM', '01:00 PM', '01:45 PM', '02:30 PM', '03:15 PM'],
@@ -145,7 +167,77 @@ export default function SecretaryBookings() {
         </header>
 
         <div className="space-y-lg mt-lg">
+          {selected ? (
+            <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center p-md" role="dialog" aria-modal="true">
+              <div className="w-full max-w-2xl bg-surface border border-outline-variant rounded-xl shadow-lg overflow-hidden">
+                <div className="px-md py-sm bg-surface-container flex justify-between items-center border-b border-outline-variant">
+                  <h3 className="font-title-sm text-title-sm text-primary">Booking Details</h3>
+                  <button
+                    type="button"
+                    className="px-sm py-xs border border-outline-variant rounded-lg text-on-surface-variant hover:bg-surface-container transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelected(null)
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+                <div className="px-md py-md space-y-sm text-body-md">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+                    <div>
+                      <div className="text-xs text-on-surface-variant font-label-caps">Patient</div>
+                      <div className="font-bold">{selected.patientName || '-'}</div>
+                      <div className="text-xs text-on-surface-variant">DentHive ID: {selected.patientDentId || '-'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-on-surface-variant font-label-caps">Appointment</div>
+                      <div className="font-bold">{selected.serviceType || '-'}</div>
+                      <div className="text-xs text-on-surface-variant">{formatDateTime(selected.scheduledAt)}</div>
+                    </div>
+                  </div>
+
+                  <div className="pt-sm border-t border-outline-variant" />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+                    <div>
+                      <div className="text-xs text-on-surface-variant font-label-caps">Contact</div>
+                      <div>Email: {selected.patient?.email || '-'}</div>
+                      <div>Phone: {selected.patient?.phone || '-'}</div>
+                      <div>Address: {selected.patient?.address || '-'}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-on-surface-variant font-label-caps">Medical</div>
+                      <div>Gender: {selected.patient?.gender || '-'}</div>
+                      <div>
+                        DOB: {selected.patient?.dob ? new Date(selected.patient.dob).toLocaleDateString() : '-'}
+                      </div>
+                      <div>Allergies: {(selected.patient?.allergies || []).join(', ') || '-'}</div>
+                      <div>Medications: {(selected.patient?.medications || []).join(', ') || '-'}</div>
+                      <div>Conditions: {(selected.patient?.chronicConditions || []).join(', ') || '-'}</div>
+                    </div>
+                  </div>
+
+                  <div className="pt-sm flex justify-end gap-sm">
+                    <button
+                      type="button"
+                      className="px-md py-xs bg-error text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+                      disabled={loading}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDeleteAppointment(selected._id)
+                      }}
+                    >
+                      Delete booking
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           <div className="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+
             <div className="px-md py-sm bg-surface-container flex justify-between items-center border-b border-outline-variant">
               <h3 className="font-title-sm text-title-sm text-primary">Bookings</h3>
               <span className="text-xs text-on-surface-variant">Total: {items.length}</span>
@@ -176,8 +268,14 @@ export default function SecretaryBookings() {
                       todayISO={todayISO}
                       onSetStatus={setStatus}
                       onReschedule={reschedule}
+                      onDelete={async (id) => {
+                        // prevent row click from immediately reopening
+                        await onDelete(id)
+                      }}
                       loading={loading}
+                      onOpenDetails={setSelected}
                     />
+
                   ))
                 )}
               </tbody>
@@ -189,13 +287,17 @@ export default function SecretaryBookings() {
   )
 }
 
-function SecretaryRow({ appointment, statusBadge, timeLabels, todayISO, onSetStatus, onReschedule, loading }) {
+function SecretaryRow({ appointment, statusBadge, timeLabels, todayISO, onSetStatus, onReschedule, onDelete, loading, onOpenDetails }) {
   const a = appointment
   const [newDate, setNewDate] = useState(todayISO)
   const [newTime, setNewTime] = useState(timeLabels[2])
 
   return (
-    <tr className="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors">
+    <tr
+      className="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors cursor-pointer"
+      onClick={() => onOpenDetails(a)}
+    >
+
       <td className="px-md py-md">{formatDateTime(a.scheduledAt)}</td>
       <td className="px-md py-md">
         <div>{a.patientName || a.patientNameSnapshot || '-'}</div>

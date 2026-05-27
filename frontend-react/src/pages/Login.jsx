@@ -39,30 +39,11 @@ export default function Login() {
   }
 
   const demoBlock = useMemo(
-    () => (
-      <div className="mt-4 bg-white/70 backdrop-blur-md border border-outline-variant rounded-xl p-md text-left">
-        <p className="font-label-caps text-label-caps text-outline mb-xs">Demo Accounts</p>
-        <p className="text-[13px] text-on-surface-variant mb-md">
-          Password for ALL accounts: <span className="font-mono font-bold">patient1</span>
-        </p>
-        <div className="space-y-xs text-[13px]">
-          <div>
-            <span className="font-bold">Admin</span> — username: <span className="font-mono">admin</span> (admin@denthive.local)
-          </div>
-          <div>
-            <span className="font-bold">Secretary</span> — username: <span className="font-mono">secretary</span> (secretary@denthive.local)
-          </div>
-          <div>
-            <span className="font-bold">Doctor</span> — username: <span className="font-mono">doctor</span> (doctor@denthive.local)
-          </div>
-          <div>
-            <span className="font-bold">Patient</span> — username: <span className="font-mono">patient</span> (patient@denthive.local)
-          </div>
-        </div>
-      </div>
-    ),
+    () => null,
     []
   )
+
+
 
   return (
     <div className="bg-surface font-body-md text-on-surface selection:bg-primary-container selection:text-on-primary-container overflow-hidden min-h-screen">

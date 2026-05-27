@@ -20,6 +20,9 @@ const appointmentSchema = new mongoose.Schema(
       index: true,
     },
 
+    // Queue ordering (optional). Used by QueueManagement drag/drop.
+    queuePosition: { type: Number, index: true },
+
     checkedInAt: { type: Date },
     completedAt: { type: Date },
   },
