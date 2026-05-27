@@ -1,21 +1,50 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import CreateStaff from './CreateStaff'
 
 export default function AdminPage() {
   const [users, setUsers] = useState([])
+  const [showPasswordIds, setShowPasswordIds] = useState(() => new Set())
+  const navigate = useNavigate()
 
-  async function loadUsers() {
+  async function loadUsers({ includePasswordHash = false } = {}) {
     try {
-      const resp = await apiFetch('/admin/users')
+      const resp = await apiFetch(`/admin/users?includePasswordHash=${includePasswordHash ? 'true' : 'false'}`)
       const data = await resp.json()
       if (resp.ok) setUsers(data.users || data)
     } catch {}
   }
 
+
   useEffect(() => {
     loadUsers()
+
+    const onStorage = (event) => {
+      if (event?.key === 'denthiveUsersRefreshAt') {
+        loadUsers({ includePasswordHash: showPasswordIds.size > 0 })
+      }
+    }
+
+
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
   }, [])
+
+  async function toggleShowPassword(uId) {
+    const next = new Set(showPasswordIds)
+    if (next.has(uId)) {
+      next.delete(uId)
+      setShowPasswordIds(next)
+      // Keep UI responsive; no need to re-fetch if we're hiding.
+      return
+    }
+
+    next.add(uId)
+    setShowPasswordIds(next)
+    // Fetch credentials only when needed.
+    await loadUsers({ includePasswordHash: true })
+  }
 
   return (
     <div className="bg-background text-on-background min-h-screen flex">
@@ -49,11 +78,25 @@ export default function AdminPage() {
             <span className="material-symbols-outlined">person_add</span>
             Create Staff
           </button>
+
+          <button
+            type="button"
+            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95"
+            onClick={() => {
+              localStorage.removeItem('denthiveToken')
+              navigate('/')
+            }}
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Logout
+          </button>
+
           <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="#">
             <span className="material-symbols-outlined">settings</span>
             <span className="font-label-caps text-label-caps uppercase">Settings</span>
           </a>
         </div>
+
 
       </aside>
 
@@ -115,6 +158,7 @@ export default function AdminPage() {
                   {users.slice(0, 10).map((u, idx) => (
                     <tr key={u._id || idx} className="hover:bg-surface-container transition-colors group">
                       <td className="px-lg py-md">
+
                         <div className="flex items-center gap-md">
                           <div className="h-10 w-10 rounded-full bg-surface-container-highest flex items-center justify-center font-bold text-primary">{(u.username || u.email || 'U').slice(0,2).toUpperCase()}</div>
                           <div>
@@ -127,9 +171,22 @@ export default function AdminPage() {
                         <span className="px-sm py-xs bg-primary-container text-on-primary-container text-label-caps font-bold rounded-full uppercase">{u.role || '—'}</span>
                       </td>
                       <td className="px-lg py-md font-data-mono text-data-mono">{u.username || '-'}</td>
-                      <td className="px-lg py-md font-body-sm text-body-sm text-outline">—</td>
+                      <td className="px-lg py-md font-body-sm text-body-sm text-outline">
+                        {showPasswordIds.has(u._id) ? (
+                          <span className="font-data-mono text-data-mono">{u.passwordHash ? String(u.passwordHash) : '—'}</span>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
                       <td className="px-lg py-md text-right space-x-xs">
-                        <button type="button" className="material-symbols-outlined text-outline hover:text-primary transition-colors" title="Change Password">lock_reset</button>
+                        <button
+                          type="button"
+                          className="material-symbols-outlined text-outline hover:text-primary transition-colors"
+                          title={showPasswordIds.has(u._id) ? 'Hide Password' : 'Show Password'}
+                          onClick={() => toggleShowPassword(u._id)}
+                        >
+                          {showPasswordIds.has(u._id) ? 'visibility_off' : 'visibility'}
+                        </button>
                         <button type="button" className="material-symbols-outlined text-outline hover:text-secondary transition-colors" title="Edit Role">edit_square</button>
                         <button type="button" className="material-symbols-outlined text-outline hover:text-error transition-colors" title="Deactivate">person_off</button>
                       </td>

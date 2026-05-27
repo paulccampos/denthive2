@@ -40,6 +40,8 @@ export default function Signup() {
       if (!resp.ok) throw new Error(data.error || 'Signup failed')
 
       localStorage.setItem('denthiveToken', data.token)
+      // Notify other tabs (like AdminPage) to refresh the users list from MongoDB.
+      localStorage.setItem('denthiveUsersRefreshAt', String(Date.now()))
       navigate('/bookingpage')
     } catch (err) {
       alert(err.message)
@@ -107,8 +109,10 @@ export default function Signup() {
                     value={`${firstName} ${lastName}`.trim()}
                     onChange={(e) => {
                       const parts = e.target.value.split(/\s+/).filter(Boolean)
-                      setFirstName(parts[0] || '')
-                      setLastName(parts.slice(1).join(' ') || '')
+                      const first = parts[0] || ''
+                      const last = parts.length > 1 ? parts.slice(1).join(' ') : first
+                      setFirstName(first)
+                      setLastName(last)
                     }}
                     required
                   />

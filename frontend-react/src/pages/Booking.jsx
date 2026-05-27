@@ -499,15 +499,29 @@ export default function Booking() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={confirmBooking}
-                  className="w-full bg-white text-primary font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-surface-container-low transition-all active:scale-95 shadow-lg"
-                >
-                  {loading ? 'CONFIRMING...' : 'CONFIRM BOOKING'}
-                  <span className="material-symbols-outlined">arrow_forward</span>
-                </button>
+                <div className="space-y-sm">
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={confirmBooking}
+                    className="w-full bg-white text-primary font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-surface-container-low transition-all active:scale-95 shadow-lg"
+                  >
+                    {loading ? 'CONFIRMING...' : 'CONFIRM BOOKING'}
+                    <span className="material-symbols-outlined">arrow_forward</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="w-full bg-primary-container/30 text-on-primary-container font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-primary-container/45 transition-all"
+                    onClick={() => {
+                      window.location.href = '/patientdashboard'
+                    }}
+                  >
+                    <span className="material-symbols-outlined">dashboard</span>
+                    Go to Patient Dashboard
+                  </button>
+                </div>
+
                 <p className="text-[10px] text-center mt-md text-white/60">No cancellation fees if canceled 24h prior.</p>
               </section>
             </div>

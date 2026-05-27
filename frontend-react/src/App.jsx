@@ -10,6 +10,8 @@ import Registry from './pages/Registry.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import DoctorBookings from './pages/DoctorBookings.jsx'
 import SecretaryBookings from './pages/SecretaryBookings.jsx'
+import RequirePatientRole from './components/RequirePatientRole.jsx'
+
 
 
 export default function App() {
@@ -18,8 +20,9 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/bookingpage" element={<Booking />} />
-      <Route path="/patientdashboard" element={<PatientDashboard />} />
+      <Route path="/bookingpage" element={<RequirePatientRole><Booking /></RequirePatientRole>} />
+      <Route path="/patientdashboard" element={<RequirePatientRole><PatientDashboard /></RequirePatientRole>} />
+
       <Route path="/queuemanagement" element={<QueueManagement />} />
       <Route path="/registry" element={<Registry />} />
       <Route path="/adminpage" element={<AdminPage />} />

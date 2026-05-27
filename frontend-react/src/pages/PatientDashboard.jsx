@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+
+function formatScheduledAt(value) {
+  if (!value) return '-'
+  try {
+    return new Date(value).toLocaleString()
+  } catch {
+    return '-'
+  }
+}
 
 export default function PatientDashboard() {
   const [patient, setPatient] = useState(null)
   const [appointments, setAppointments] = useState([])
+  const [selectedAppointment, setSelectedAppointment] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     ;(async () => {
@@ -25,6 +37,14 @@ export default function PatientDashboard() {
     })()
   }, [])
 
+  const selectedStatus = (selectedAppointment?.status || '').toUpperCase()
+  const selectedBadgeClass =
+    selectedAppointment?.status === 'completed'
+      ? 'bg-secondary text-white'
+      : selectedAppointment?.status === 'canceled'
+        ? 'bg-error text-white'
+        : 'bg-primary-container text-on-primary-container'
+
   return (
     <div className="bg-background text-on-background">
       <aside className="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant z-50">
@@ -37,24 +57,29 @@ export default function PatientDashboard() {
             <p className="font-label-caps text-label-caps text-outline">Dental Management</p>
           </div>
         </div>
-                <nav className="flex-1 mt-md space-y-xs px-sm">
+        <nav className="flex-1 mt-md space-y-xs px-sm">
           <a className="bg-primary-container text-on-primary-container font-bold px-md py-sm flex items-center gap-sm rounded-lg border-r-4 border-primary transition-all" href="#">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+              dashboard
+            </span>
             <span className="font-label-caps text-label-caps">Bookings</span>
           </a>
           <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/bookingpage">
             <span className="material-symbols-outlined">calendar_month</span>
             <span className="font-label-caps text-label-caps">Book Appointment</span>
           </a>
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/registry">
-            <span className="material-symbols-outlined">folder_shared</span>
-            <span className="font-label-caps text-label-caps">Records</span>
-          </a>
         </nav>
         <div className="mt-auto border-t border-outline-variant px-sm py-md">
-          <button className="w-full bg-secondary text-white py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:opacity-90 transition-all" type="button">
-            <span className="material-symbols-outlined">add</span>
-            Add New Patient
+          <button
+            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95 mt-sm"
+            type="button"
+            onClick={() => {
+              localStorage.removeItem('denthiveToken')
+              navigate('/')
+            }}
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Logout
           </button>
         </div>
       </aside>
@@ -65,7 +90,11 @@ export default function PatientDashboard() {
             <h2 className="font-headline-md text-headline-md font-bold text-primary">Patient Record</h2>
             <div className="hidden lg:flex items-center bg-surface-container-lowest border border-outline-variant rounded-full px-md py-xs ml-xl">
               <span className="material-symbols-outlined text-outline text-sm">search</span>
-              <input className="bg-transparent border-none focus:ring-0 text-body-sm w-64" placeholder="Search patient ID or name..." type="text" />
+              <input
+                className="bg-transparent border-none focus:ring-0 text-body-sm w-64"
+                placeholder="Search patient ID or name..."
+                type="text"
+              />
             </div>
           </div>
           <div className="flex items-center gap-md">
@@ -100,7 +129,9 @@ export default function PatientDashboard() {
               <div className="glass-card rounded-xl p-lg overflow-hidden">
                 <div className="flex items-center justify-between mb-lg">
                   <h3 className="font-headline-md text-headline-md">Medical Record</h3>
-                  <button className="text-primary font-title-sm" type="button">Edit</button>
+                  <button className="text-primary font-title-sm" type="button">
+                    Edit
+                  </button>
                 </div>
                 <div className="space-y-md">
                   <div className="flex items-start gap-md">
@@ -140,7 +171,7 @@ export default function PatientDashboard() {
               </div>
             </div>
 
-              <div className="lg:col-span-8 glass-card rounded-xl p-lg">
+            <div className="lg:col-span-8 glass-card rounded-xl p-lg">
               <div className="flex items-center justify-between mb-lg">
                 <h3 className="font-headline-md text-headline-md">Treatment History & Queue</h3>
                 <div className="flex gap-sm">
@@ -198,7 +229,7 @@ export default function PatientDashboard() {
                               <button
                                 type="button"
                                 className="text-primary hover:bg-primary-fixed p-xs rounded"
-                                onClick={() => alert('Appointment details coming soon.')}
+                                onClick={() => setSelectedAppointment(a)}
                               >
                                 <span className="material-symbols-outlined text-base">visibility</span>
                               </button>
@@ -211,14 +242,74 @@ export default function PatientDashboard() {
                 </table>
               </div>
 
+              {selectedAppointment ? (
+                <div className="mt-lg border border-outline-variant rounded-xl p-md bg-surface-container-lowest">
+                  <div className="flex items-start justify-between gap-sm mb-md">
+                    <div>
+                      <div className="flex items-center gap-sm mb-xs">
+                        <span className="material-symbols-outlined text-primary">medical_services</span>
+                        <h4 className="font-headline-md text-headline-md">Appointment Details</h4>
+                      </div>
+                      <p className="text-on-surface-variant text-xs">Selected appointment from your bookings list.</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="px-md py-xs border border-outline-variant rounded-lg font-title-sm hover:bg-surface-container transition-all"
+                      onClick={() => setSelectedAppointment(null)}
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                    <div className="space-y-xs">
+                      <p className="text-xs text-on-surface-variant font-label-caps">TREATMENT</p>
+                      <p className="font-title-sm text-on-surface">{selectedAppointment.serviceType || '-'}</p>
+                    </div>
+                    <div className="space-y-xs">
+                      <p className="text-xs text-on-surface-variant font-label-caps">DOCTOR</p>
+                      <p className="font-title-sm text-on-surface">{selectedAppointment.preferredDoctor || '-'}</p>
+                    </div>
+                    <div className="space-y-xs">
+                      <p className="text-xs text-on-surface-variant font-label-caps">SCHEDULED</p>
+                      <p className="font-title-sm text-on-surface">{formatScheduledAt(selectedAppointment.scheduledAt)}</p>
+                    </div>
+                    <div className="space-y-xs">
+                      <p className="text-xs text-on-surface-variant font-label-caps">STATUS</p>
+                      <span className={`inline-flex items-center px-sm py-xs rounded-full font-label-caps text-[10px] ${selectedBadgeClass}`}>
+                        {selectedStatus || '-'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-lg border border-outline-variant rounded-xl p-md bg-surface-container-lowest">
+                  <div className="flex items-start gap-sm">
+                    <span className="material-symbols-outlined text-outline">info</span>
+                    <div>
+                      <p className="font-title-sm text-on-surface">Select an appointment</p>
+                      <p className="text-xs text-on-surface-variant">Click the visibility icon on a row to view more details.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-auto pt-lg flex justify-between items-center">
                 <button type="button" className="font-body-sm text-outline hover:text-on-surface transition-colors flex items-center gap-xs">
                   <span className="material-symbols-outlined text-sm">download</span>
                   Download Full Medical Report (PDF)
                 </button>
                 <div className="flex gap-sm">
-                  <button type="button" className="px-md py-sm border border-outline-variant rounded-lg font-title-sm hover:bg-surface-container transition-all">Archive Record</button>
-                  <button type="button" className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={() => (window.location.href = '/bookingpage')}>New Booking</button>
+                  <button type="button" className="px-md py-sm border border-outline-variant rounded-lg font-title-sm hover:bg-surface-container transition-all">
+                    Archive Record
+                  </button>
+                  <button
+                    type="button"
+                    className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all"
+                    onClick={() => (window.location.href = '/bookingpage')}
+                  >
+                    New Booking
+                  </button>
                 </div>
               </div>
             </div>

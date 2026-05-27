@@ -6,8 +6,14 @@ const { requireAuth } = require('../utils/auth');
 const router = express.Router();
 
 // Staff list: admin-only view
-router.get('/users', requireAuth(['admin']), async (_req, res) => {
-  const users = await User.find({}, { passwordHash: 0 }).sort({ createdAt: -1 }).limit(200);
+router.get('/users', requireAuth(['admin']), async (req, res) => {
+  // Default: do not expose passwordHash.
+  // Admin can request credential data explicitly.
+  const includePasswordHash = String(req.query.includePasswordHash || '').toLowerCase() === 'true';
+
+  const projection = includePasswordHash ? {} : { passwordHash: 0 };
+
+  const users = await User.find({}, projection).sort({ createdAt: -1 }).limit(200);
   res.json({ users });
 });
 
