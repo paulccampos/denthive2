@@ -38,7 +38,36 @@ export default function Booking() {
   const [selectedTeeth, setSelectedTeeth] = useState([])
   const [loading, setLoading] = useState(false)
 
+  // Medical history (saved into Patient record)
+  const [hasAllergies, setHasAllergies] = useState('no')
+  const [allergyOptions, setAllergyOptions] = useState([])
+
+  const [hasMedications, setHasMedications] = useState('no')
+  const [medicationsOptions, setMedicationsOptions] = useState([])
+
+  const [hasChronicConditions, setHasChronicConditions] = useState('no')
+  const [chronicConditionOptions, setChronicConditionOptions] = useState([])
+
+  const allergyChoices = useMemo(
+    () => ['Penicillin', 'Latex', 'Aspirin', 'Other'],
+    []
+  )
+  const medicationChoices = useMemo(
+    () => ['Metformin', 'Ibuprofen', 'Antibiotics', 'Other'],
+    []
+  )
+  const chronicConditionChoices = useMemo(
+    () => ['Type 2 Diabetes', 'Asthma', 'Hypertension', 'Other'],
+    []
+  )
+
+  const parseMultiSelect = (e) => {
+    const selected = Array.from(e.target.selectedOptions || []).map((o) => o.value)
+    return selected
+  }
+
   const token = typeof window !== 'undefined' ? localStorage.getItem('denthiveToken') : null
+
 
   const timeSlots = useMemo(
     () => ['09:00 AM', '09:45 AM', '10:30 AM', '11:15 AM', '01:00 PM', '01:45 PM', '02:30 PM', '03:15 PM'],
@@ -137,8 +166,12 @@ export default function Booking() {
           preferredDoctor: doctor,
           scheduledAt,
           toothFlags: selectedTeeth,
+          allergies: hasAllergies === 'yes' ? allergyOptions : [],
+          medications: hasMedications === 'yes' ? medicationsOptions : [],
+          chronicConditions: hasChronicConditions === 'yes' ? chronicConditionOptions : [],
         },
       })
+
 
       const data = await resp.json()
       if (!resp.ok) throw new Error(data.error || 'Booking failed')
@@ -260,6 +293,7 @@ export default function Booking() {
                     02. SELECT DATE
                   </h3>
                 <div className="flex items-center gap-md">
+
                     <button
                       className="material-symbols-outlined p-xs hover:bg-surface-container transition-colors rounded-lg"
                       type="button"
@@ -349,10 +383,117 @@ export default function Booking() {
 
               <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg overflow-hidden">
                 <h3 className="font-label-caps text-outline mb-md flex items-center gap-sm">
+                  <span className="material-symbols-outlined text-primary">medical_services</span>
+                  02.5 MEDICAL HISTORY
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-lg mt-md">
+                  <div className="space-y-xs">
+                    <label className="font-label-caps text-on-surface-variant block ml-xs">Allergies</label>
+                    <select
+                      className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none cursor-pointer"
+                      value={hasAllergies}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setHasAllergies(v)
+                        if (v !== 'yes') setAllergyOptions([])
+                      }}
+                    >
+                      <option value="no">No</option>
+                      <option value="yes">Yes</option>
+                    </select>
+
+                    <select
+                      multiple
+                      disabled={hasAllergies !== 'yes'}
+                      className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg cursor-pointer min-h-[96px]"
+                      value={allergyOptions}
+                      onChange={(e) => setAllergyOptions(parseMultiSelect(e))}
+                    >
+                      {allergyChoices.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-xs">
+                    <label className="font-label-caps text-on-surface-variant block ml-xs">Medications</label>
+                    <select
+                      className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none cursor-pointer"
+                      value={hasMedications}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setHasMedications(v)
+                        if (v !== 'yes') setMedicationsOptions([])
+                      }}
+                    >
+                      <option value="no">None</option>
+                      <option value="yes">Taking</option>
+                    </select>
+
+                    <select
+                      multiple
+                      disabled={hasMedications !== 'yes'}
+                      className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg cursor-pointer min-h-[96px]"
+                      value={medicationsOptions}
+                      onChange={(e) => setMedicationsOptions(parseMultiSelect(e))}
+                    >
+                      {medicationChoices.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-xs">
+                    <label className="font-label-caps text-on-surface-variant block ml-xs">Chronic Conditions</label>
+                    <select
+                      className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none cursor-pointer"
+                      value={hasChronicConditions}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setHasChronicConditions(v)
+                        if (v !== 'yes') setChronicConditionOptions([])
+                      }}
+                    >
+                      <option value="no">None</option>
+                      <option value="yes">Have</option>
+                    </select>
+
+                    <select
+                      multiple
+                      disabled={hasChronicConditions !== 'yes'}
+                      className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg cursor-pointer min-h-[96px]"
+                      value={chronicConditionOptions}
+                      onChange={(e) => setChronicConditionOptions(parseMultiSelect(e))}
+                    >
+                      {chronicConditionChoices.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-xs">
+                    <p className="text-xs text-on-surface-variant">
+                      Select one or more items. If you choose “No/None”, medical info will be saved as empty.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg overflow-hidden">
+                <h3 className="font-label-caps text-outline mb-md flex items-center gap-sm">
                   <span className="material-symbols-outlined text-primary">dentistry</span>
-                  02.5 SELECT TEETH (OPTIONAL)
+                  03. SELECT TEETH (OPTIONAL)
                 </h3>
                 <p className="text-xs text-on-surface-variant mb-lg">Click on specific teeth to highlight areas of concern for your practitioner.</p>
+
+
 
                 <div className="flex flex-col md:flex-row gap-lg items-center justify-center">
                   <div className="w-full max-w-[400px] bg-surface-container-low p-md rounded-xl border border-outline-variant">
@@ -499,28 +640,29 @@ export default function Booking() {
                   </div>
                 </div>
 
-                <div className="space-y-sm">
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={confirmBooking}
-                    className="w-full bg-white text-primary font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-surface-container-low transition-all active:scale-95 shadow-lg"
-                  >
-                    {loading ? 'CONFIRMING...' : 'CONFIRM BOOKING'}
-                    <span className="material-symbols-outlined">arrow_forward</span>
-                  </button>
+                  <div className="space-y-sm">
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={confirmBooking}
+                      className="w-full bg-white text-primary font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-surface-container-low transition-all active:scale-95 shadow-lg"
+                    >
+                      {loading ? 'CONFIRMING...' : 'CONFIRM BOOKING'}
+                      <span className="material-symbols-outlined">arrow_forward</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    className="w-full bg-primary-container/30 text-on-primary-container font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-primary-container/45 transition-all"
-                    onClick={() => {
-                      window.location.href = '/patientdashboard'
-                    }}
-                  >
-                    <span className="material-symbols-outlined">dashboard</span>
-                    Go to Patient Dashboard
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      className="w-full bg-primary-container/30 text-on-primary-container font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-primary-container/45 transition-all"
+                      onClick={() => {
+                        window.location.href = '/patientdashboard'
+                      }}
+                    >
+                      <span className="material-symbols-outlined">dashboard</span>
+                      Go to Patient Dashboard
+                    </button>
+                  </div>
+
 
                 <p className="text-[10px] text-center mt-md text-white/60">No cancellation fees if canceled 24h prior.</p>
               </section>

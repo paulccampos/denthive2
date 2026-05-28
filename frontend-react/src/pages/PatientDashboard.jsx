@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import ToothMap from '../components/ToothMap'
+
 
 function formatScheduledAt(value) {
   if (!value) return '-'
@@ -14,8 +16,18 @@ function formatScheduledAt(value) {
 export default function PatientDashboard() {
   const [patient, setPatient] = useState(null)
   const [appointments, setAppointments] = useState([])
+  const [clinicalRecords, setClinicalRecords] = useState([])
   const [selectedAppointment, setSelectedAppointment] = useState(null)
   const navigate = useNavigate()
+
+
+  const dentalFlags = useMemo(() => {
+    // Prefer selected appointment's tooth flags; fallback to the most recent appointment.
+    if (selectedAppointment?.toothFlags?.length) return selectedAppointment.toothFlags
+    const latest = appointments?.[0]
+    return latest?.toothFlags || []
+  }, [appointments, selectedAppointment])
+
 
   useEffect(() => {
     ;(async () => {
@@ -36,6 +48,17 @@ export default function PatientDashboard() {
       } catch {}
     })()
   }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const resp = await apiFetch('/clinical-records/me')
+        const data = await resp.json()
+        if (resp.ok) setClinicalRecords(data.clinicalRecords || [])
+      } catch {}
+    })()
+  }, [])
+
 
   const selectedStatus = (selectedAppointment?.status || '').toUpperCase()
   const selectedBadgeClass =
@@ -129,46 +152,101 @@ export default function PatientDashboard() {
               <div className="glass-card rounded-xl p-lg overflow-hidden">
                 <div className="flex items-center justify-between mb-lg">
                   <h3 className="font-headline-md text-headline-md">Medical Record</h3>
-                  <button className="text-primary font-title-sm" type="button">
+                  <button
+                    className="text-primary font-title-sm"
+                    type="button"
+                    onClick={() => alert('Clinical notes are managed by your dentist/doctor.')} // read-only for patients
+                  >
                     Edit
                   </button>
                 </div>
-                <div className="space-y-md">
+                  <div className="space-y-md">
                   <div className="flex items-start gap-md">
                     <span className="material-symbols-outlined text-error">warning</span>
                     <div>
                       <p className="font-title-sm text-on-surface">Allergies</p>
-                      <p className="font-body-md text-body-md text-outline">Penicillin, Latex (Low sensitivity)</p>
+                      <p className="font-body-md text-body-md text-outline">{(patient?.allergies || []).join(', ') || 'None reported'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-md">
                     <span className="material-symbols-outlined text-primary">pill</span>
                     <div>
                       <p className="font-title-sm text-on-surface">Current Medications</p>
-                      <p className="font-body-md text-body-md text-outline">None reported</p>
+                      <p className="font-body-md text-body-md text-outline">{(patient?.medications || []).join(', ') || 'None reported'}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-md">
                     <span className="material-symbols-outlined text-secondary">medical_information</span>
                     <div>
                       <p className="font-title-sm text-on-surface">Chronic Conditions</p>
-                      <p className="font-body-md text-body-md text-outline">Type 2 Diabetes (Managed)</p>
+                      <p className="font-body-md text-body-md text-outline">{(patient?.chronicConditions || []).join(', ') || 'None reported'}</p>
                     </div>
                   </div>
+
+                  <div className="pt-md border-t border-outline-variant">
+                    <p className="font-title-sm text-on-surface mb-xs">Clinical Notes</p>
+                    {clinicalRecords.length === 0 ? (
+                      <p className="text-xs text-on-surface-variant">No clinical records yet.</p>
+                    ) : (
+                      <div className="space-y-sm">
+                        {clinicalRecords.slice(0, 3).map((r) => (
+                          <div key={r._id || r.appointmentId} className="rounded-lg border border-outline-variant p-sm">
+                            <p className="text-[10px] text-on-surface-variant font-label-caps mb-[2px]">
+                              {r.appointmentId ? `Appointment: ${r.appointmentId}` : 'Visit'} • {r.createdAt ? new Date(r.createdAt).toLocaleString() : '-'}
+                            </p>
+                            {r.consultationNotes ? (
+                              <p className="text-xs text-on-surface">{r.consultationNotes}</p>
+                            ) : (
+                              <>
+                                <p className="text-xs text-on-surface-variant">No consultation notes yet.</p>
+                                {/* Fallback: show the same patient request medical history captured at booking time */}
+                                {selectedAppointment ? (
+                                  <div className="mt-xs space-y-[2px]">
+                                    <p className="text-[10px] text-on-surface-variant">Allergies: {Array.isArray(selectedAppointment.allergies) ? selectedAppointment.allergies.join(', ') : 'None reported'}</p>
+                                    <p className="text-[10px] text-on-surface-variant">Medications: {Array.isArray(selectedAppointment.medications) ? selectedAppointment.medications.join(', ') : 'None reported'}</p>
+                                    <p className="text-[10px] text-on-surface-variant">Chronic Conditions: {Array.isArray(selectedAppointment.chronicConditions) ? selectedAppointment.chronicConditions.join(', ') : 'None reported'}</p>
+                                  </div>
+                                ) : null}
+                              </>
+                            )}
+
+
+
+
+                            {Array.isArray(r.procedures) && r.procedures.length > 0 ? (
+                              <p className="text-[10px] text-on-surface-variant mt-xs">
+                                Procedures: {r.procedures
+                                  .slice(0, 5)
+                                  .map((p) => `${p.tooth || '-'} (${p.procedure || '-'})`)
+                                  .join(', ')}{r.procedures.length > 5 ? '…' : ''}
+                              </p>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
+
               </div>
+
 
               <div className="glass-card rounded-xl p-lg">
                 <h3 className="font-headline-md text-headline-md mb-md">Dental Map</h3>
                 <div className="bg-surface-container-low rounded-lg p-md flex flex-col items-center justify-center min-h-[200px] border border-dashed border-outline-variant">
-                  <div className="text-center">
-                    <p className="font-body-sm text-on-surface-variant">(Placeholder) Interactive dental map from Appointments/SVG data goes here.</p>
-                  </div>
+                  <ToothMap selected={dentalFlags} readOnly />
                 </div>
-                <button type="button" className="w-full mt-lg border border-primary text-primary py-sm rounded-lg font-title-sm hover:bg-primary hover:text-white transition-all">
-                  Open Interactive Chart
+                <button
+                  type="button"
+                  className="w-full mt-lg border border-primary text-primary py-sm rounded-lg font-title-sm hover:bg-primary hover:text-white transition-all"
+                  onClick={() => {
+                    alert('Dental map is read-only on Patient Dashboard. Select an appointment to preview its tooth flags.');
+                  }}
+                >
+                  Preview Dental Map
                 </button>
               </div>
+
             </div>
 
             <div className="lg:col-span-8 glass-card rounded-xl p-lg">

@@ -30,5 +30,31 @@ router.get('/', requireAuth(['secretary', 'admin', 'doctor', 'patient']), async 
   }
 });
 
+// Get authenticated patient's own profile
+router.get('/me', requireAuth(['patient']), async (req, res) => {
+  try {
+    const patient = await Patient.findOne({ userId: req.auth.sub }).lean();
+    if (!patient) return res.status(400).json({ error: 'Patient profile not found' });
+
+    // Frontend expects these arrays for the Medical Record card
+    return res.json({
+      denthivePatientId: patient.denthivePatientId || null,
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      email: patient.email || null,
+      phone: patient.phone || null,
+      address: patient.address || null,
+      dob: patient.dob || null,
+      gender: patient.gender || null,
+      allergies: patient.allergies || [],
+      medications: patient.medications || [],
+      chronicConditions: patient.chronicConditions || [],
+    });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to load patient profile' });
+  }
+});
+
 module.exports = { patientsRouter: router };
+
 

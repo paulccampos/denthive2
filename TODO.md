@@ -1,20 +1,9 @@
-# TODO
+# Task TODO: Make medical record functionable in patients dashboard
 
-## Secretary + Queue: make UI buttons work + reorder + full patient info
-
-- [x] Step 1: Add `queuePosition` to `backend/models/Appointment.js` and ensure default behavior
-
-- [x] Step 2: Update `backend/routes/queue.js` to sort by `queuePosition` (fallback to `scheduledAt`)
-
-- [ ] Step 3: Add backend endpoints:
-  - [x] 3a) `DELETE /api/appointments/:id` (mark canceled)
-  - [x] 3b) `PATCH /api/queue/reorder` (set queuePosition based on provided ID order)
-
-- [ ] Step 4: Update SecretaryBookings frontend:
-  - [ ] 4a) Row click opens modal with full patient info
-  - [ ] 4b) Add Delete booking button
-- [ ] Step 5: Update QueueManagement frontend:
-  - [ ] 5a) Implement drag-and-drop reorder and “first -> last” action
-  - [ ] 5b) Implement delete/check-in actions via backend
-- [ ] Step 6: Run backend + frontend smoke tests
-
+- [ ] Update `backend/routes/patients.js` to add `GET /api/patients/me` for authenticated patients (return allergies/medications/chronicConditions + basic profile fields needed by dashboard).
+- [ ] Update `backend/routes/clinical.js` to add `GET /api/clinical-records/me` for authenticated patients to read their clinical records (read-only).
+- [ ] Update `frontend-react/src/pages/PatientDashboard.jsx` to fetch and render clinical records under the Medical Record card (read-only) and handle loading/empty states.
+- [ ] Optionally adjust “Edit” button behavior to be view-only/no-op with a helpful message.
+- [ ] Smoke test:
+  - [ ] Run backend and verify endpoints respond.
+  - [ ] Run/build frontend and confirm patient dashboard loads with clinical records.

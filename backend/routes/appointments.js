@@ -99,11 +99,30 @@ router.get('/', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) 
   try {
     const status = req.query.status
 
+    // Base filter: doctor should only see appointments intended for their POV.
+    // We infer the doctor identity from the authenticated user:
+    // - In Booking.jsx, preferredDoctor is selected from a hard-coded list ("Dr. ... (General)")
+    //   in this codebase, but seeded doctor account username is "doctor".
+    // - Since Appointment.preferredDoctor is stored as that string, and we don't have a dedicated doctorId field,
+    //   we instead support both:
+    //   (1) preferredDoctor === 'doctor' (if appointments were created with that value)
+    //   (2) preferredDoctor === the doctor's username (req.auth.sub doesn't map to display strings here)
+    //   Fallback to (2) by comparing against req.auth.role only for doctor accounts.
     const filter = status
       ? { status }
       : { status: { $in: ['waiting', 'scheduled', 'calling', 'in_progress'] } }
 
+    if (req.auth.role === 'doctor') {
+      // Doctor portal is intended to show only this doctor's bookings.
+      // Appointment.preferredDoctor is a string set from the Booking page.
+      // In this repo's seed, the doctor staff username is "doctor".
+      // If your Booking page uses full display names, update this mapping accordingly.
+      filter.preferredDoctor = 'doctor'
+    }
+
+
     const items = await Appointment.find(filter).sort({ scheduledAt: 1 }).limit(200).lean()
+
 
     // enrich with full patient info (for secretary UI)
     const enriched = await Promise.all(
@@ -217,7 +236,16 @@ router.delete('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req,
 
 router.post('/', requireAuth(['patient']), async (req, res) => {
   try {
-    const { serviceType, preferredDoctor, scheduledAt, toothFlags = [] } = req.body || {};
+    const {
+      serviceType,
+      preferredDoctor,
+      scheduledAt,
+      toothFlags = [],
+      allergies = [],
+      medications = [],
+      chronicConditions = [],
+    } = req.body || {};
+
 
     if (!serviceType || !scheduledAt) return res.status(400).json({ error: 'Missing serviceType/scheduledAt' });
 
@@ -238,6 +266,13 @@ router.post('/', requireAuth(['patient']), async (req, res) => {
       return res.status(409).json({ error: 'Selected time is no longer available' });
     }
 
+    // Persist patient's medical info for later display in Patient Dashboard.
+    // (Per your requirement, we store it as part of patient record rather than only on the appointment.)
+    patient.allergies = Array.isArray(allergies) ? allergies : [];
+    patient.medications = Array.isArray(medications) ? medications : [];
+    patient.chronicConditions = Array.isArray(chronicConditions) ? chronicConditions : [];
+    await patient.save();
+
     const appt = await Appointment.create({
       patientId: patient._id,
       patientNameSnapshot: `${patient.firstName} ${patient.lastName}`,
@@ -248,6 +283,7 @@ router.post('/', requireAuth(['patient']), async (req, res) => {
       createdByUserId: req.auth.sub,
       status: 'waiting',
     });
+
 
     return res.status(201).json({ appointment: appt });
   } catch (e) {

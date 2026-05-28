@@ -27,6 +27,7 @@ export default function HtmlLikeShell({ variant, userName, children }) {
       { to: '/patientdashboard', icon: 'dashboard', label: 'Bookings', exact: true },
     ],
 
+
   }
 
   const items = navItems[variant] || []

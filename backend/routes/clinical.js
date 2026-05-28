@@ -5,6 +5,7 @@ const { requireAuth } = require('../utils/auth');
 
 const router = express.Router();
 
+// Create clinical record (doctor)
 router.post('/', requireAuth(['doctor']), async (req, res) => {
   try {
     const {
@@ -37,5 +38,26 @@ router.post('/', requireAuth(['doctor']), async (req, res) => {
   }
 });
 
+// Read authenticated patient's own clinical records (patient)
+router.get('/me', requireAuth(['patient']), async (req, res) => {
+  try {
+    const Patient = require('../models/Patient');
+
+    const patientProfile = await Patient.findOne({ userId: req.auth.sub }).lean();
+    if (!patientProfile) return res.status(400).json({ error: 'Patient profile not found' });
+
+    const records = await ClinicalRecord.find({ patientId: patientProfile._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.json({ clinicalRecords: records });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to load clinical records' });
+  }
+});
+
+
+
 module.exports = { clinicalRouter: router };
+
 

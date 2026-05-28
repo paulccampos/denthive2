@@ -24,6 +24,7 @@ export default function App() {
       <Route path="/patientdashboard" element={<RequirePatientRole><PatientDashboard /></RequirePatientRole>} />
 
       <Route path="/queuemanagement" element={<QueueManagement />} />
+
       <Route path="/registry" element={<Registry />} />
       <Route path="/adminpage" element={<AdminPage />} />
       <Route path="/doctorbookings" element={<DoctorBookings />} />

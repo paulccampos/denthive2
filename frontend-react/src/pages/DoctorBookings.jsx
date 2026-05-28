@@ -72,10 +72,7 @@ export default function DoctorBookings() {
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>folder_shared</span>
             <span className="font-label-caps text-label-caps">Bookings</span>
           </a>
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/queueManagement">
-            <span className="material-symbols-outlined">group</span>
-            <span className="font-label-caps text-label-caps">Queue</span>
-          </a>
+
           <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/bookingpage">
             <span className="material-symbols-outlined">calendar_month</span>
             <span className="font-label-caps text-label-caps">Schedule</span>
@@ -85,15 +82,25 @@ export default function DoctorBookings() {
 
       <main className="ml-64 p-margin-desktop">
         <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
-          <div className="flex items-center gap-md">
-            <h2 className="font-headline-md text-headline-md font-bold text-primary">Doctor Bookings</h2>
+          <div className="space-y-1">
+            <h2 className="font-headline-md text-headline-md font-bold text-primary">Doctor POV</h2>
+            <p className="text-xs text-on-surface-variant">
+              Your upcoming appointments. Use <b>Complete</b> when finished, or <b>Reject</b> if you can’t proceed.
+            </p>
           </div>
           <div className="flex gap-sm">
-            <button type="button" className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={load} disabled={loading}>
-              {loading ? 'Loading...' : 'Refresh'}
+            <button
+              type="button"
+              className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all"
+              onClick={load}
+              disabled={loading}
+              aria-label="Refresh doctor appointments"
+            >
+              {loading ? 'Loading…' : 'Refresh'}
             </button>
           </div>
         </header>
+
 
         <div className="space-y-lg mt-lg">
           <div className="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm">
