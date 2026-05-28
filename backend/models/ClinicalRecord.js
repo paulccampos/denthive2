@@ -16,6 +16,9 @@ const clinicalRecordSchema = new mongoose.Schema(
 
     consultationNotes: { type: String },
 
+    // Price the patient needs to pay for this procedure/visit
+    pricePHP: { type: Number },
+
     createdByUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     createdByRole: { type: String, enum: ['doctor'], default: 'doctor' },
 

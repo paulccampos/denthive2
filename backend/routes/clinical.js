@@ -12,7 +12,9 @@ router.post('/', requireAuth(['doctor']), async (req, res) => {
       appointmentId,
       procedures = [],
       consultationNotes,
+      pricePHP,
     } = req.body || {};
+
 
     if (!appointmentId) return res.status(400).json({ error: 'Missing appointmentId' });
 
@@ -24,10 +26,12 @@ router.post('/', requireAuth(['doctor']), async (req, res) => {
       appointmentId: appt._id,
       procedures,
       consultationNotes,
+      pricePHP: typeof pricePHP === 'number' ? pricePHP : undefined,
       createdByUserId: req.auth.sub,
       createdByRole: 'doctor',
       status: 'completed',
     });
+
 
     appt.status = 'completed';
     await appt.save();
@@ -56,8 +60,25 @@ router.get('/me', requireAuth(['patient']), async (req, res) => {
   }
 });
 
+// Secretary/Admin: read clinical records by appointmentId (for History UI)
+router.get('/by-appointment/:appointmentId', requireAuth(['secretary', 'admin', 'doctor']), async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    if (!appointmentId) return res.status(400).json({ error: 'Missing appointmentId' });
+
+    const records = await ClinicalRecord.find({ appointmentId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.json({ clinicalRecords: records });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to load clinical records' });
+  }
+});
 
 
 module.exports = { clinicalRouter: router };
+
+
 
 

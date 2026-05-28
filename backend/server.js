@@ -10,6 +10,12 @@ const { queueRouter } = require('./routes/queue');
 const { clinicalRouter } = require('./routes/clinical');
 const { adminRouter } = require('./routes/admin');
 const { pricesRouter } = require('./routes/prices');
+const { historyRouter } = require('./routes/history');
+const { doctorAppointmentsRouter } = require('./routes/doctorAppointments');
+
+
+
+
 
 
 const app = express();
@@ -67,11 +73,15 @@ async function start() {
   app.use('/api/queue', queueRouter);
   app.use('/api/clinical-records', clinicalRouter);
   app.use('/api/prices', pricesRouter);
-  app.use('/api/admin', adminRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/history', historyRouter);
+app.use('/api/doctor-appointments', doctorAppointmentsRouter);
 
 
 
-  // NOTE: Seeding disabled by default.
+// NOTE: Seeding disabled by default.
+
+
   // Login relies only on existing DB records.
 
   app.listen(PORT, () => {

@@ -2,6 +2,10 @@ export function getToken() {
   return localStorage.getItem('denthiveToken')
 }
 
+export function logout() {
+  localStorage.removeItem('denthiveToken')
+}
+
 export function apiFetch(path, { method = 'GET', body } = {}) {
   const headers = {
     'Content-Type': 'application/json',
@@ -16,4 +20,5 @@ export function apiFetch(path, { method = 'GET', body } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   })
 }
+
 

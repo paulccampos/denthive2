@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { apiFetch } from '../lib/api'
+import { apiFetch, logout } from '../lib/api'
+
 
 export default function QueueManagement() {
   const [queue, setQueue] = useState([])
@@ -107,22 +108,43 @@ export default function QueueManagement() {
               <span className="material-symbols-outlined text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>dentistry</span>
             </div>
             <div>
-              <h1 className="font-headline-md text-headline-md font-bold text-primary">DentaCare</h1>
+              <h1 className="font-headline-md text-headline-md font-bold text-primary">DentHive</h1>
               <p className="font-label-caps text-label-caps text-on-surface-variant">Dental Management</p>
+
             </div>
           </div>
           <nav className="flex flex-col gap-xs">
-            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="#">
-              <span className="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-              <span className="font-label-caps text-label-caps">Dashboard</span>
-            </a>
+
+
+
             <a className="bg-primary-container text-on-primary-container font-bold border-r-4 border-primary px-md py-sm flex items-center gap-sm transition-all duration-200" href="#">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
               <span className="font-label-caps text-label-caps">Queue</span>
             </a>
-          </nav>
+            <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200" href="/history">
+              <span className="material-symbols-outlined">history</span>
+              <span className="font-label-caps text-label-caps">History</span>
+            </a>
+        </nav>
+
+        <div className="p-md border-t border-outline-variant mt-auto">
+
+          <button
+            type="button"
+            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95"
+            onClick={() => {
+              logout()
+              window.location.href = '/'
+            }}
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Logout
+          </button>
+        </div>
+
         </div>
       </aside>
+
 
       {/* Main Content */}
       <main className="ml-64 flex-1">

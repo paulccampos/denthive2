@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { apiFetch } from '../lib/api'
+import { apiFetch, logout } from '../lib/api'
+
 
 export default function Registry() {
   const [patients, setPatients] = useState([])
@@ -18,6 +19,7 @@ export default function Registry() {
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen">
       <aside className="h-screen w-64 fixed left-0 top-0 flex flex-col border-r border-outline-variant bg-surface-container-low z-50">
+
         <div className="px-md py-lg flex flex-col gap-xs">
           <div className="flex items-center gap-sm mb-lg">
             <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
@@ -43,7 +45,21 @@ export default function Registry() {
             </a>
           </nav>
         </div>
+        <div className="mt-auto border-t border-outline-variant p-md">
+          <button
+            type="button"
+            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95"
+            onClick={() => {
+              logout()
+              window.location.href = '/'
+            }}
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Logout
+          </button>
+        </div>
       </aside>
+
 
       <header className="flex justify-between items-center w-[calc(100%-16rem)] ml-64 px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
         <div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { apiFetch } from '../lib/api'
+import { apiFetch, logout } from '../lib/api'
+
 
 function formatDateTime(dt) {
   if (!dt) return '-'
@@ -139,7 +140,21 @@ export default function SecretaryBookings() {
             <span className="font-label-caps text-label-caps">Schedule</span>
           </a>
         </nav>
+        <div className="p-md border-t border-outline-variant mt-auto">
+          <button
+            type="button"
+            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95"
+            onClick={() => {
+              logout()
+              window.location.href = '/'
+            }}
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Logout
+          </button>
+        </div>
       </aside>
+
 
       <main className="ml-64 p-margin-desktop">
         <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
@@ -157,8 +172,12 @@ export default function SecretaryBookings() {
               <option value="scheduled">scheduled</option>
               <option value="calling">calling</option>
               <option value="in_progress">in_progress</option>
-              <option value="completed">completed</option>
-              <option value="canceled">canceled</option>
+              <option value="archived">archived</option>
+              {/* completed/canceled moved to History */}
+
+              {/* <option value="completed">completed</option> */}
+              {/* <option value="canceled">canceled</option> */}
+
             </select>
             <button type="button" className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={load} disabled={loading}>
               {loading ? 'Loading...' : 'Refresh'}

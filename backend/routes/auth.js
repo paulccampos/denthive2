@@ -34,9 +34,19 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
 
 
-    // generate denthivePatientId using count of patients
+    // generate denthivePatientId using count of patients, but avoid collisions
+    // (important when patients are deleted/re-seeded).
     const total = await Patient.countDocuments();
-    const denthivePatientId = createPatientId(total + 1);
+    let denthivePatientId = createPatientId(total + 1);
+    let attempts = 0;
+    while (attempts < 25) {
+      // Ensure the generated ID is not already used.
+      const exists = await Patient.exists({ denthivePatientId });
+      if (!exists) break;
+      attempts += 1;
+      denthivePatientId = createPatientId(total + 1 + attempts);
+    }
+
 
     const patient = await Patient.create({
       denthivePatientId,
@@ -64,9 +74,16 @@ router.post('/register', async (req, res) => {
     return res.status(201).json({ token: signToken(user), role: user.role });
   } catch (e) {
     if (String(e).includes('duplicate key')) {
-      return res.status(409).json({ error: 'User already exists' });
+      // Mongo duplicate key error message usually contains the violated index, e.g.:
+      //  E11000 duplicate key error collection: denthive.users index: email_1 dup key: { email: "..." }
+      const msg = String(e);
+      const isEmailDup = msg.includes('email_1') || msg.includes('dup key') && msg.toLowerCase().includes('email');
+      const isUsernameDup = msg.includes('username_1') || msg.toLowerCase().includes('username');
+      const field = isEmailDup ? 'email' : isUsernameDup ? 'username' : 'account';
+      return res.status(409).json({ error: `${field} already exists` });
     }
     return res.status(500).json({ error: 'Register failed' });
+
   }
 });
 

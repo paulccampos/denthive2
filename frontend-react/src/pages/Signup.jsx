@@ -3,15 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 
 export default function Signup() {
-  const [firstName, setFirstName] = useState('')
-
-  const [lastName, setLastName] = useState('')
+  const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [loading, setLoading] = useState(false)
   const [showDemoHint, setShowDemoHint] = useState(false)
+
 
   const navigate = useNavigate()
 
@@ -31,10 +29,15 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true)
     try {
+      const parts = fullName.split(/\s+/).filter(Boolean)
+      const firstName = parts[0] || ''
+      const lastName = parts.length > 1 ? parts.slice(1).join(' ') : ''
+
       const resp = await apiFetch('/auth/register', {
         method: 'POST',
-        body: { firstName, lastName, email, phone, username, password },
+        body: { firstName, lastName, email, phone: phoneNumber, password },
       })
+
 
       const data = await resp.json()
       if (!resp.ok) throw new Error(data.error || 'Signup failed')
@@ -101,19 +104,14 @@ export default function Signup() {
               <div>
                 <label className="font-label-caps text-label-caps text-on-surface-variant block mb-xs">FULL NAME</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">person</span>
+                  <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline pointer-events-none">person</span>
+
                   <input
-                    className="w-full pl-xl pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring transition-all"
+                    className="w-full pl-16 pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring transition-all"
                     placeholder="Dr. Jane Smith"
                     type="text"
-                    value={`${firstName} ${lastName}`.trim()}
-                    onChange={(e) => {
-                      const parts = e.target.value.split(/\s+/).filter(Boolean)
-                      const first = parts[0] || ''
-                      const last = parts.length > 1 ? parts.slice(1).join(' ') : first
-                      setFirstName(first)
-                      setLastName(last)
-                    }}
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     required
                   />
                 </div>
@@ -122,9 +120,10 @@ export default function Signup() {
               <div>
                 <label className="font-label-caps text-label-caps text-on-surface-variant block mb-xs">EMAIL ADDRESS</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">mail</span>
+                  <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline pointer-events-none">mail</span>
+
                   <input
-                    className="w-full pl-xl pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring transition-all"
+                    className="w-full pl-16 pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring transition-all"
                     placeholder="jane@example.com"
                     type="email"
                     value={email}
@@ -135,15 +134,16 @@ export default function Signup() {
               </div>
 
               <div>
-                <label className="font-label-caps text-label-caps text-on-surface-variant block mb-xs">PHONE NUMBER</label>
+                <label className="font-label-caps text-label-caps text-on-surface-variant block mb-xs">NUMBER</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">call</span>
+                  <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline pointer-events-none">call</span>
+
                   <input
-                    className="w-full pl-xl pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring transition-all"
+                    className="w-full pl-16 pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring transition-all"
                     placeholder="+1 (555) 000-0000"
                     type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                   />
                 </div>
               </div>
@@ -151,9 +151,10 @@ export default function Signup() {
               <div>
                 <label className="font-label-caps text-label-caps text-on-surface-variant block mb-xs">PASSWORD</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">lock</span>
+                  <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline pointer-events-none">lock</span>
+
                   <input
-                    className="w-full pl-xl pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring transition-all"
+                    className="w-full pl-16 pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring transition-all"
                     placeholder="••••••••"
                     type="password"
                     value={password}

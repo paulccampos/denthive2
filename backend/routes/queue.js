@@ -54,6 +54,29 @@ router.post('/:id/checkin', requireAuth(['secretary', 'admin']), async (req, res
   }
 });
 
+const HistoryAppointment = require('../models/HistoryAppointment');
+
+async function moveToHistory(appt, { reason } = {}) {
+  const payload = {
+    patientId: appt.patientId,
+    patientNameSnapshot: appt.patientNameSnapshot,
+    serviceType: appt.serviceType,
+    preferredDoctor: appt.preferredDoctor,
+    scheduledAt: appt.scheduledAt,
+    toothFlags: appt.toothFlags || [],
+    createdByUserId: appt.createdByUserId,
+    status: appt.status,
+    queuePosition: appt.queuePosition,
+    checkedInAt: appt.checkedInAt,
+    completedAt: appt.completedAt,
+    historyReason: reason || null,
+  };
+
+  const hist = await HistoryAppointment.create(payload);
+  await Appointment.deleteOne({ _id: appt._id });
+  return hist;
+}
+
 router.post('/:id/complete', requireAuth(['secretary', 'admin']), async (req, res) => {
   try {
     const appt = await Appointment.findById(req.params.id);
@@ -63,11 +86,13 @@ router.post('/:id/complete', requireAuth(['secretary', 'admin']), async (req, re
     appt.completedAt = new Date();
     await appt.save();
 
-    return res.json({ appointment: appt });
+    const history = await moveToHistory(appt, { reason: 'completed' });
+    return res.json({ appointment: null, history });
   } catch (e) {
     return res.status(500).json({ error: 'Complete failed' });
   }
 });
+
 
 // Reorder queue via drag/drop.
 // Body: { ids: [appointmentId1, appointmentId2, ...] }

@@ -2,8 +2,10 @@ const mongoose = require('mongoose');
 
 const patientSchema = new mongoose.Schema(
   {
-    // DentHive unique id (human)
-    denthivePatientId: { type: String, index: true, unique: true },
+    // DentHive id (human)
+    // NOTE: must allow multiple patient accounts; uniqueness is enforced via safer ID generation.
+    denthivePatientId: { type: String, index: true },
+
 
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },

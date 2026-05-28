@@ -22,8 +22,11 @@ export default function Login() {
         method: 'POST',
         body: { identity, password },
       })
-      const data = await resp.json()
-      if (!resp.ok) throw new Error(data.error || 'Login failed')
+
+      // Some error responses may be non-JSON (or empty) causing resp.json() to throw.
+      const data = await resp.json().catch(() => null)
+      if (!resp.ok) throw new Error(data?.error || `Login failed (HTTP ${resp.status})`)
+
 
       localStorage.setItem('denthiveToken', data.token)
 

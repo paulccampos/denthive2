@@ -5,7 +5,8 @@ const { requireAuth } = require('../utils/auth');
 
 const router = express.Router();
 
-const BLOCKING_STATUSES = ['scheduled', 'waiting', 'calling', 'in_progress'];
+const BLOCKING_STATUSES = ['scheduled', 'waiting', 'calling', 'in_progress', 'next'];
+
 
 function parseISODateOnly(dateOnly) {
   // dateOnly: YYYY-MM-DD
@@ -110,7 +111,8 @@ router.get('/', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) 
     //   Fallback to (2) by comparing against req.auth.role only for doctor accounts.
     const filter = status
       ? { status }
-      : { status: { $in: ['waiting', 'scheduled', 'calling', 'in_progress'] } }
+      : { status: { $in: ['waiting', 'scheduled', 'calling', 'in_progress', 'next'] } }
+
 
     if (req.auth.role === 'doctor') {
       // Doctor portal is intended to show only this doctor's bookings.
@@ -209,29 +211,64 @@ router.patch('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req, 
       }
     }
 
+    // Finished/canceled appointments should be moved into history.
+    if (appt.status === 'completed' || appt.status === 'canceled') {
+      await appt.save()
+      const history = await moveToHistory(appt, { reason: appt.status });
+      return res.json({ appointment: null, history })
+    }
+
     await appt.save()
 
     return res.json({ appointment: appt })
+
   } catch (e) {
     return res.status(500).json({ error: 'Update appointment failed' })
   }
 })
 
-// Delete appointment (secretary/admin/doctor): mark as canceled and remove from queue.
+const HistoryAppointment = require('../models/HistoryAppointment');
+
+async function moveToHistory(appt, { reason } = {}) {
+  // Convert mongoose doc -> plain so we can re-create in history.
+  const payload = {
+    patientId: appt.patientId,
+    patientNameSnapshot: appt.patientNameSnapshot,
+    serviceType: appt.serviceType,
+    preferredDoctor: appt.preferredDoctor,
+    scheduledAt: appt.scheduledAt,
+    toothFlags: appt.toothFlags || [],
+    createdByUserId: appt.createdByUserId,
+    status: appt.status,
+    queuePosition: appt.queuePosition,
+    appointmentId: appt._id,
+    checkedInAt: appt.checkedInAt,
+    completedAt: appt.completedAt,
+    historyReason: reason || null,
+  };
+
+  const hist = await HistoryAppointment.create(payload);
+  await Appointment.deleteOne({ _id: appt._id });
+  return hist;
+}
+
+// Delete appointment (secretary/admin/doctor): move to history.
 router.delete('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) => {
   try {
     const appt = await Appointment.findById(req.params.id);
     if (!appt) return res.status(404).json({ error: 'Appointment not found' });
 
-    // Soft-delete with status=archived to keep history.
+    // Mark archived for audit, then move.
     appt.status = 'archived';
     await appt.save();
 
-    return res.json({ appointment: appt });
+    const history = await moveToHistory(appt, { reason: 'deleted' });
+    return res.json({ appointment: appt, history });
   } catch (e) {
     return res.status(500).json({ error: 'Delete appointment failed' });
   }
 });
+
 
 
 router.post('/', requireAuth(['patient']), async (req, res) => {

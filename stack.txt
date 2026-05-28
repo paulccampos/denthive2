@@ -1,0 +1,73 @@
+Denthive2 Tech Stack (only what’s used in this project)
+
+1) HTML
+- Location: frontend-react/index.html (main entry for the React SPA)
+- Purpose: Provides the HTML shell that Vite/React mounts into (#root), includes Tailwind CDN + fonts + Material Symbols.
+
+2) CSS
+- Location: frontend-react/src/styles.css
+- Purpose: App-level styling and theme variables; also includes Tailwind directives (base/components/utilities) and some fallback classes.
+
+3) React (SPA UI)
+- Location: frontend-react/src/
+- Purpose: Component-based frontend pages (e.g., Login, Signup, QueueManagement, AdminPage) using JSX.
+
+4) React Router (client-side routing)
+- Location: frontend-react/src/App.jsx
+- Package: react-router-dom
+- Purpose: Routes like /login, /signup, /bookingpage, /queuemanagement, etc.
+
+5) Vite (frontend build/dev server)
+- Location: frontend-react/vite.config.js
+- Purpose: Builds the React app and proxies /api to the Express backend during development.
+
+6) Node.js (server runtime)
+- Location: backend/
+- Purpose: Runs the backend server (scripts run with node; backend/server.js).
+
+7) Express (HTTP API + static hosting)
+- Location: backend/server.js and backend/routes/*
+- Package: express
+- Purpose:
+  - Provides REST endpoints under /api/*
+  - Serves the compiled React frontend (frontend-react/dist)
+  - SPA fallback (sends index.html for non-/api routes)
+
+8) MongoDB (database)
+- Location: configured via MONGO_URI/MONGO_DB in backend/server.js
+- Purpose: Persists app data like users, patients, appointments/queue, clinical records, prices.
+
+9) Mongoose (ODM for MongoDB)
+- Location: backend/models/*.js
+- Package: mongoose
+- Purpose: Defines schemas/models and performs database queries using JavaScript objects.
+
+10) JWT (authentication tokens)
+- Location: backend/utils/auth.js + backend/routes/auth.js; frontend stores token in localStorage
+- Package: jsonwebtoken
+- Purpose:
+  - signToken(user) returns a JWT (7d expiry)
+  - requireAuth middleware verifies JWT and role-based access
+  - Frontend attaches Authorization: Bearer <token>
+
+11) bcryptjs (password hashing)
+- Location: backend/routes/auth.js
+- Package: bcryptjs
+- Purpose: Hashes passwords during registration and verifies them during login.
+
+12) CORS
+- Location: backend/server.js
+- Package: cors
+- Purpose: Allows cross-origin requests from the frontend.
+
+13) express-rate-limit
+- Location: backend/server.js
+- Package: express-rate-limit
+- Purpose: Throttles requests to reduce abuse.
+
+Notes / Not included (because not clearly used in the code/package deps you provided)
+- No React Native
+- No TypeORM/Sequelize
+- No Webpack
+- No axios (frontend uses fetch in frontend-react/src/lib/api.js)
+
