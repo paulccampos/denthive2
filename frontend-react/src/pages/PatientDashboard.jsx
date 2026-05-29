@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import ToothMap from '../components/ToothMap'
 
-
 function formatScheduledAt(value) {
   if (!value) return '-'
   try {
@@ -71,6 +70,8 @@ export default function PatientDashboard() {
   return (
     <div className="bg-background text-on-background">
       <aside className="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant z-50">
+
+
         <div className="p-lg flex items-center gap-sm">
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
             <span className="material-symbols-outlined text-white">dentistry</span>
@@ -107,8 +108,9 @@ export default function PatientDashboard() {
         </div>
       </aside>
 
-      <main className="md:ml-64 flex flex-col min-h-screen">
+      <main className="flex flex-col min-h-screen">
         <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md font-bold text-primary">Patient Record</h2>
             <div className="hidden lg:flex items-center bg-surface-container-lowest border border-outline-variant rounded-full px-md py-xs ml-xl">
@@ -199,14 +201,36 @@ export default function PatientDashboard() {
                             ) : (
                               <>
                                 <p className="text-xs text-on-surface-variant">No consultation notes yet.</p>
-                                {/* Fallback: show the same patient request medical history captured at booking time */}
-                                {selectedAppointment ? (
-                                  <div className="mt-xs space-y-[2px]">
-                                    <p className="text-[10px] text-on-surface-variant">Allergies: {Array.isArray(selectedAppointment.allergies) ? selectedAppointment.allergies.join(', ') : 'None reported'}</p>
-                                    <p className="text-[10px] text-on-surface-variant">Medications: {Array.isArray(selectedAppointment.medications) ? selectedAppointment.medications.join(', ') : 'None reported'}</p>
-                                    <p className="text-[10px] text-on-surface-variant">Chronic Conditions: {Array.isArray(selectedAppointment.chronicConditions) ? selectedAppointment.chronicConditions.join(', ') : 'None reported'}</p>
-                                  </div>
-                                ) : null}
+                                {/* Fallback: show medical history captured at booking time */}
+                                <div className="mt-xs space-y-[2px]">
+                                  <p className="text-[10px] text-on-surface-variant">
+                                    Allergies: {(Array.isArray(selectedAppointment?.allergies)
+                                      ? selectedAppointment.allergies
+                                      : Array.isArray(patient?.allergies)
+                                        ? patient.allergies
+                                        : [])
+                                      .filter(Boolean)
+                                      .join(', ') || 'None reported'}
+                                  </p>
+                                  <p className="text-[10px] text-on-surface-variant">
+                                    Medications: {(Array.isArray(selectedAppointment?.medications)
+                                      ? selectedAppointment.medications
+                                      : Array.isArray(patient?.medications)
+                                        ? patient.medications
+                                        : [])
+                                      .filter(Boolean)
+                                      .join(', ') || 'None reported'}
+                                  </p>
+                                  <p className="text-[10px] text-on-surface-variant">
+                                    Chronic Conditions: {(Array.isArray(selectedAppointment?.chronicConditions)
+                                      ? selectedAppointment.chronicConditions
+                                      : Array.isArray(patient?.chronicConditions)
+                                        ? patient.chronicConditions
+                                        : [])
+                                      .filter(Boolean)
+                                      .join(', ') || 'None reported'}
+                                  </p>
+                                </div>
                               </>
                             )}
 

@@ -26,6 +26,8 @@ function getMonthMatrix(year, monthIndex) {
 }
 
 export default function Booking() {
+  // NOTE: When used inside PatientPortalShell, the app frame (sidebar/topbar) is provided by the shell.
+
   const [reason, setReason] = useState('General Checkup')
   const [doctor, setDoctor] = useState('Any Available Practitioner')
 
@@ -47,6 +49,16 @@ export default function Booking() {
 
   const [hasChronicConditions, setHasChronicConditions] = useState('no')
   const [chronicConditionOptions, setChronicConditionOptions] = useState([])
+
+  // Medical history should be immutable on Booking page once it exists.
+  const [prefillLoaded, setPrefillLoaded] = useState(false)
+  const medicalHistoryLocked = prefillLoaded && (
+    (allergyOptions?.length || 0) > 0 ||
+    (medicationsOptions?.length || 0) > 0 ||
+    (chronicConditionOptions?.length || 0) > 0
+  )
+
+
 
   const allergyChoices = useMemo(
     () => ['Penicillin', 'Latex', 'Aspirin', 'Other'],
@@ -145,12 +157,42 @@ export default function Booking() {
     setSelectedTeeth((cur) => (cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]))
   }
 
+  useEffect(() => {
+    if (!token) return
+    ;(async () => {
+      try {
+        const resp = await apiFetch('/patients/me')
+        const data = await resp.json()
+        if (!resp.ok) return
+
+        const allergies = Array.isArray(data.allergies) ? data.allergies : []
+        const meds = Array.isArray(data.medications) ? data.medications : []
+        const chronic = Array.isArray(data.chronicConditions) ? data.chronicConditions : []
+
+        // Prefill and lock the choices so the user doesn't re-enter for the same account.
+        setAllergyOptions(allergies)
+        setHasAllergies(allergies.length ? 'yes' : 'no')
+
+        setMedicationsOptions(meds)
+        setHasMedications(meds.length ? 'yes' : 'no')
+
+        setChronicConditionOptions(chronic)
+        setHasChronicConditions(chronic.length ? 'yes' : 'no')
+
+        setPrefillLoaded(true)
+      } catch {
+        // ignore
+      }
+    })()
+  }, [token])
+
   async function confirmBooking() {
     if (!token) {
       alert('Please log in to book an appointment.')
       window.location.href = '/login'
       return
     }
+
 
     setLoading(true)
     try {
@@ -203,6 +245,8 @@ export default function Booking() {
 
   return (
     <div className="bg-background text-on-background overflow-x-hidden">
+
+      {/* removed duplicated frame when embedded in PatientPortalShell */}
       <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-md">
           <div>
@@ -390,15 +434,16 @@ export default function Booking() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-lg mt-md">
                   <div className="space-y-xs">
                     <label className="font-label-caps text-on-surface-variant block ml-xs">Allergies</label>
-                    <select
-                      className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none cursor-pointer"
-                      value={hasAllergies}
-                      onChange={(e) => {
-                        const v = e.target.value
-                        setHasAllergies(v)
-                        if (v !== 'yes') setAllergyOptions([])
-                      }}
-                    >
+                      <select
+                        className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none cursor-pointer"
+                        value={hasAllergies}
+                        disabled={medicalHistoryLocked}
+                        onChange={(e) => {
+                          const v = e.target.value
+                          setHasAllergies(v)
+                          if (v !== 'yes') setAllergyOptions([])
+                        }}
+                      >
                       <option value="no">No</option>
                       <option value="yes">Yes</option>
                     </select>
@@ -423,6 +468,7 @@ export default function Booking() {
                     <select
                       className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none cursor-pointer"
                       value={hasMedications}
+                      disabled={medicalHistoryLocked}
                       onChange={(e) => {
                         const v = e.target.value
                         setHasMedications(v)

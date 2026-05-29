@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Booking from './pages/Booking.jsx'
 import PatientDashboard from './pages/PatientDashboard.jsx'
+import PatientPortalShell from './components/PatientPortalShell.jsx'
 import QueueManagement from './pages/QueueManagement.jsx'
 import Registry from './pages/Registry.jsx'
 import AdminPage from './pages/AdminPage.jsx'
@@ -23,8 +24,8 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/bookingpage" element={<RequirePatientRole><Booking /></RequirePatientRole>} />
-      <Route path="/patientdashboard" element={<RequirePatientRole><PatientDashboard /></RequirePatientRole>} />
+      <Route path="/bookingpage" element={<RequirePatientRole><PatientPortalShell><Booking /></PatientPortalShell></RequirePatientRole>} />
+      <Route path="/patientdashboard" element={<RequirePatientRole><PatientPortalShell><PatientDashboard /></PatientPortalShell></RequirePatientRole>} />
 
       <Route path="/queuemanagement" element={<QueueManagement />} />
 
