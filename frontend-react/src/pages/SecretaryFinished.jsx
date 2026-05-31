@@ -17,7 +17,7 @@ function moneyPHP(n) {
 function statusBadge(status) {
   const s = (status || '').toUpperCase()
   const badgeClass =
-    status === 'paid' ? 'bg-secondary text-white' : 'bg-primary-container text-on-primary-container'
+    status === 'paid' ? 'bg-secondary text-on-secondary' : 'bg-primary-container text-on-primary-container'
   return (
     <span className={`px-sm py-xs rounded-full font-label-caps text-[10px] ${badgeClass}`}>{s}</span>
   )
@@ -73,18 +73,18 @@ export default function SecretaryFinished() {
   }
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden">
+    <div className="app-page min-h-screen overflow-x-hidden">
       <SecretarySidebar currentPathname={window.location.pathname} />
 
       <main className="ml-64 p-margin-desktop">
-        <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+        <header className="flex justify-between items-center w-full px-margin-desktop py-sm app-header sticky top-0 z-40">
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md font-bold text-primary">Finished & Payment Queue</h2>
           </div>
           <div className="flex items-center gap-sm">
             <button
               type="button"
-              className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all"
+              className="px-md py-sm bg-primary text-on-primary rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all"
               onClick={load}
               disabled={loading}
             >
@@ -96,7 +96,7 @@ export default function SecretaryFinished() {
         <div className="space-y-lg mt-lg">
           {selected ? (
             <div
-              className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center p-md"
+              className="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-md"
               role="dialog"
               aria-modal="true"
             >
@@ -162,7 +162,7 @@ export default function SecretaryFinished() {
                   <div className="pt-sm flex justify-end gap-sm">
                     <button
                       type="button"
-                      className="px-md py-xs bg-primary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+                      className="px-md py-xs bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
                       disabled={loading}
                       onClick={() => pay(selected?._id ?? selected?.id)}
                     >
