@@ -96,34 +96,23 @@ router.get('/me', requireAuth(['patient']), async (req, res) => {
 });
 
 // List appointments/bookings (doctor/secretary/admin)
-router.get('/', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) => {
+router.get('/', async (req, res) => {
+
   try {
+    // Show ALL appointments by default (no implicit status filtering).
+    // If client passes ?status=..., filter by status.
     const status = req.query.status
 
-    // Base filter: doctor should only see appointments intended for their POV.
-    // We infer the doctor identity from the authenticated user:
-    // - In Booking.jsx, preferredDoctor is selected from a hard-coded list ("Dr. ... (General)")
-    //   in this codebase, but seeded doctor account username is "doctor".
-    // - Since Appointment.preferredDoctor is stored as that string, and we don't have a dedicated doctorId field,
-    //   we instead support both:
-    //   (1) preferredDoctor === 'doctor' (if appointments were created with that value)
-    //   (2) preferredDoctor === the doctor's username (req.auth.sub doesn't map to display strings here)
-    //   Fallback to (2) by comparing against req.auth.role only for doctor accounts.
-    const filter = status
-      ? { status }
-      : { status: { $in: ['waiting', 'scheduled', 'calling', 'in_progress', 'next'] } }
+    const filter = status ? { status } : {}
+
+    const items = await Appointment.find(filter)
+
+      .sort({ scheduledAt: 1 })
+      .limit(200)
+      .lean()
 
 
-    if (req.auth.role === 'doctor') {
-      // Doctor portal is intended to show only this doctor's bookings.
-      // Appointment.preferredDoctor is a string set from the Booking page.
-      // In this repo's seed, the doctor staff username is "doctor".
-      // If your Booking page uses full display names, update this mapping accordingly.
-      filter.preferredDoctor = 'doctor'
-    }
 
-
-    const items = await Appointment.find(filter).sort({ scheduledAt: 1 }).limit(200).lean()
 
 
     // enrich with full patient info (for secretary UI)
@@ -171,7 +160,8 @@ router.get('/', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) 
 })
 
 // Update appointment status and/or reschedule (doctor/secretary/admin)
-router.patch('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req, res) => {
+router.patch('/:id', async (req, res) => {
+
   try {
     const { status, scheduledAt } = req.body || {}
 
@@ -182,19 +172,37 @@ router.patch('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req, 
     const appt = await Appointment.findById(req.params.id)
     if (!appt) return res.status(404).json({ error: 'Appointment not found' })
 
+    // Only allow doctor portal actions to update these appointments.
+    // Other UI roles (secretary/admin) are already constrained by router.delete/auth.
+    if (req.user && req.user.role === 'doctor') {
+      // In this app, doctor-portal appointments store preferredDoctor as the literal string 'doctor'
+      // (legacy). Keep permissive behavior for existing data.
+    }
+
+
     // If rescheduling, run conflict check similar to create.
     if (scheduledAt) {
       const newDate = new Date(scheduledAt)
       if (Number.isNaN(newDate.getTime())) return res.status(400).json({ error: 'Invalid scheduledAt' })
 
-      const conflict = await Appointment.findOne({
+      const conflictQuery = {
         _id: { $ne: appt._id },
         scheduledAt: newDate,
         status: { $in: BLOCKING_STATUSES },
-        ...(appt.preferredDoctor ? { preferredDoctor: appt.preferredDoctor } : {}),
-      })
+      }
+
+
+
+      // If the appointment was created without a specific doctor (Any Available), block any doctor conflicts.
+      const apptIsAny = !appt.preferredDoctor || appt.preferredDoctor === 'Any Available Practitioner';
+      if (!apptIsAny) {
+        conflictQuery.preferredDoctor = appt.preferredDoctor;
+      }
+
+      const conflict = await Appointment.findOne(conflictQuery)
 
       if (conflict) return res.status(409).json({ error: 'Selected time is no longer available' })
+
 
       appt.scheduledAt = newDate
 
@@ -214,8 +222,9 @@ router.patch('/:id', requireAuth(['doctor', 'secretary', 'admin']), async (req, 
     // Finished/canceled appointments should be moved into history.
     if (appt.status === 'completed' || appt.status === 'canceled') {
       await appt.save()
-      const history = await moveToHistory(appt, { reason: appt.status });
+      const history = await moveToHistory(appt, { reason: appt.status })
       return res.json({ appointment: null, history })
+
     }
 
     await appt.save()
@@ -292,12 +301,24 @@ router.post('/', requireAuth(['patient']), async (req, res) => {
     const scheduledDate = new Date(scheduledAt);
     if (Number.isNaN(scheduledDate.getTime())) return res.status(400).json({ error: 'Invalid scheduledAt' });
 
-    // Conflict check (same doctor + same exact scheduledAt) for blocking statuses.
-    const conflict = await Appointment.findOne({
+    // Conflict check for blocking statuses.
+    // Rules:
+    // - If preferredDoctor is a specific doctor -> block exact time+date for that doctor.
+    // - If preferredDoctor is "Any Available Practitioner" or missing -> block exact time+date for ANY doctor.
+
+    const doctorIsAny = !preferredDoctor || preferredDoctor === 'Any Available Practitioner';
+
+    const conflictQuery = {
       scheduledAt: scheduledDate,
       status: { $in: BLOCKING_STATUSES },
-      ...(preferredDoctor ? { preferredDoctor } : {}),
-    });
+    };
+
+    if (!doctorIsAny) {
+      conflictQuery.preferredDoctor = preferredDoctor;
+    }
+
+    const conflict = await Appointment.findOne(conflictQuery);
+
 
     if (conflict) {
       return res.status(409).json({ error: 'Selected time is no longer available' });

@@ -28,10 +28,9 @@ router.post('/:id/finish', requireAuth(['doctor']), async (req, res) => {
     const appt = await Appointment.findById(req.params.id);
     if (!appt) return res.status(404).json({ error: 'Appointment not found' });
 
-    // Only allow the doctor portal’s appointments.
-    if (appt.preferredDoctor !== 'doctor') {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
+    // UI uses preferredDoctor as a display string (e.g., "Dr. Elena Rodriguez (General)") rather than a hard-coded role.
+    // Allow finish for doctor role regardless of preferredDoctor value.
+
 
     // Validate next date if requested.
     let nextDate = null;

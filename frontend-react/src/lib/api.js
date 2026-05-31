@@ -7,11 +7,12 @@ export function logout() {
 }
 
 export function apiFetch(path, { method = 'GET', body } = {}) {
+  const token = getToken()
   const headers = {
     'Content-Type': 'application/json',
   }
 
-  const token = getToken()
+  // Backend expects JWT in `Authorization: Bearer <token>`.
   if (token) headers.Authorization = `Bearer ${token}`
 
   return fetch(`/api${path}`, {
@@ -20,5 +21,7 @@ export function apiFetch(path, { method = 'GET', body } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   })
 }
+
+
 
 

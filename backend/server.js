@@ -12,6 +12,9 @@ const { adminRouter } = require('./routes/admin');
 const { pricesRouter } = require('./routes/prices');
 const { historyRouter } = require('./routes/history');
 const { doctorAppointmentsRouter } = require('./routes/doctorAppointments');
+const { finishedRouter } = require('./routes/finished');
+
+
 
 
 
@@ -19,6 +22,7 @@ const { doctorAppointmentsRouter } = require('./routes/doctorAppointments');
 
 
 const app = express();
+
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
@@ -76,10 +80,13 @@ async function start() {
 app.use('/api/admin', adminRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/doctor-appointments', doctorAppointmentsRouter);
+app.use('/api/finished', finishedRouter);
+
 
 
 
 // NOTE: Seeding disabled by default.
+
 
 
   // Login relies only on existing DB records.

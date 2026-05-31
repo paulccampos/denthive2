@@ -11,7 +11,13 @@ import Registry from './pages/Registry.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import DoctorBookings from './pages/DoctorBookings.jsx'
 import SecretaryHistory from './pages/SecretaryHistory.jsx'
+import DoctorFinished from './pages/DoctorFinished.jsx'
+import SecretaryFinished from './pages/SecretaryFinished.jsx'
+
 import RequirePatientRole from './components/RequirePatientRole.jsx'
+
+
+
 
 
 
@@ -32,8 +38,13 @@ export default function App() {
       <Route path="/registry" element={<Registry />} />
       <Route path="/adminpage" element={<AdminPage />} />
       <Route path="/doctorbookings" element={<DoctorBookings />} />
+      <Route path="/doctorfinished/:appointmentId" element={<DoctorFinished />} />
+
+
+      <Route path="/secretaryfinished" element={<SecretaryFinished />} />
 
       <Route path="/history" element={<SecretaryHistory />} />
+
 
 
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -41,4 +52,5 @@ export default function App() {
     </Routes>
   )
 }
+
 

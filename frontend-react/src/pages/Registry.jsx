@@ -31,19 +31,28 @@ export default function Registry() {
             </div>
           </div>
           <nav className="flex flex-col gap-xs">
-            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="#">
-              <span className="material-symbols-outlined">dashboard</span>
-              <span className="font-label-caps text-label-caps">Dashboard</span>
-            </a>
-            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="#">
-              <span className="material-symbols-outlined">group</span>
-              <span className="font-label-caps text-label-caps">Queue</span>
-            </a>
-            <a className="bg-primary-container text-on-primary-container font-bold border-r-4 border-primary px-md py-sm flex items-center gap-sm rounded-l-lg" href="#">
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/registry">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>folder_shared</span>
               <span className="font-label-caps text-label-caps">Patients</span>
             </a>
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/secretaryfinished">
+              <span className="material-symbols-outlined">paid</span>
+              <span className="font-label-caps text-label-caps">Payments</span>
+            </a>
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/history">
+              <span className="material-symbols-outlined">history</span>
+              <span className="font-label-caps text-label-caps">History</span>
+            </a>
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/queuemanagement">
+              <span className="material-symbols-outlined">group</span>
+              <span className="font-label-caps text-label-caps">Queue</span>
+            </a>
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/bookingpage">
+              <span className="material-symbols-outlined">calendar_month</span>
+              <span className="font-label-caps text-label-caps">Schedule</span>
+            </a>
           </nav>
+
         </div>
         <div className="mt-auto border-t border-outline-variant p-md">
           <button
@@ -59,6 +68,7 @@ export default function Registry() {
           </button>
         </div>
       </aside>
+
 
 
       <header className="flex justify-between items-center w-[calc(100%-16rem)] ml-64 px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">

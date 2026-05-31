@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { apiFetch, logout } from '../lib/api'
+import { apiFetch } from '../lib/api'
+import SecretarySidebar from '../components/SecretarySidebar.jsx'
 
 
 export default function QueueManagement() {
   const [queue, setQueue] = useState([])
 
-
   // initial load handled by refresh() effect below
+
 
 
   async function deleteAppointment(id) {
@@ -100,55 +101,13 @@ export default function QueueManagement() {
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden">
 
-      {/* Sidebar Navigation */}
-      <aside className="flex flex-col h-full border-r border-outline-variant bg-surface-container-low h-screen w-64 fixed left-0 top-0 z-50">
-        <div className="px-md py-lg flex flex-col gap-xs">
-          <div className="flex items-center gap-sm mb-lg">
-            <div className="w-10 h-10 bg-primary-container rounded flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>dentistry</span>
-            </div>
-            <div>
-              <h1 className="font-headline-md text-headline-md font-bold text-primary">DentHive</h1>
-              <p className="font-label-caps text-label-caps text-on-surface-variant">Dental Management</p>
-
-            </div>
-          </div>
-          <nav className="flex flex-col gap-xs">
-
-
-
-            <a className="bg-primary-container text-on-primary-container font-bold border-r-4 border-primary px-md py-sm flex items-center gap-sm transition-all duration-200" href="#">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
-              <span className="font-label-caps text-label-caps">Queue</span>
-            </a>
-            <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all duration-200" href="/history">
-              <span className="material-symbols-outlined">history</span>
-              <span className="font-label-caps text-label-caps">History</span>
-            </a>
-        </nav>
-
-        <div className="p-md border-t border-outline-variant mt-auto">
-
-          <button
-            type="button"
-            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95"
-            onClick={() => {
-              logout()
-              window.location.href = '/'
-            }}
-          >
-            <span className="material-symbols-outlined">logout</span>
-            Logout
-          </button>
-        </div>
-
-        </div>
-      </aside>
+      <SecretarySidebar currentPathname={window.location.pathname} />
 
 
       {/* Main Content */}
       <main className="ml-64 flex-1">
         <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md font-bold text-primary">Queue Management</h2>
             <div className="flex items-center gap-xs px-sm py-xs bg-surface-container-high rounded-full">

@@ -131,14 +131,37 @@ export default function SecretaryBookings() {
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
             <span className="font-label-caps text-label-caps">Bookings</span>
           </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/secretaryfinished">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>paid</span>
+            <span className="font-label-caps text-label-caps">Finished & Payment</span>
+          </a>
+
           <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/registry">
             <span className="material-symbols-outlined">folder_shared</span>
             <span className="font-label-caps text-label-caps">Patients</span>
           </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/secretaryfinished">
+            <span className="material-symbols-outlined">paid</span>
+            <span className="font-label-caps text-label-caps">Payments</span>
+          </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/history">
+            <span className="material-symbols-outlined">history</span>
+            <span className="font-label-caps text-label-caps">History</span>
+          </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/queuemanagement">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+            <span className="font-label-caps text-label-caps">Queue</span>
+          </a>
+
           <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/bookingpage">
             <span className="material-symbols-outlined">calendar_month</span>
             <span className="font-label-caps text-label-caps">Schedule</span>
           </a>
+
         </nav>
         <div className="p-md border-t border-outline-variant mt-auto">
           <button
@@ -330,8 +353,12 @@ function SecretaryRow({ appointment, statusBadge, timeLabels, todayISO, onSetSta
             type="button"
             className="px-sm py-xs bg-secondary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
             disabled={loading}
-            onClick={() => onSetStatus(a._id, 'scheduled')}
+            onClick={() => {
+              if (!confirm('Confirm this booking?')) return
+              onSetStatus(a._id, 'scheduled')
+            }}
             title="Confirm booking"
+
           >
             Confirm
           </button>
@@ -339,11 +366,20 @@ function SecretaryRow({ appointment, statusBadge, timeLabels, todayISO, onSetSta
             type="button"
             className="px-sm py-xs border border-outline-variant text-on-surface-variant rounded-lg font-label-caps text-label-caps hover:bg-surface-container transition-all"
             disabled={loading}
-            onClick={() => onSetStatus(a._id, 'canceled')}
+            onClick={() => {
+              const wantsFinished = window.confirm('Reject booking? Click OK to mark as FINISHED (move to secretary payment queue), or Cancel to cancel instead.')
+              if (wantsFinished) {
+                // Secretary “finished” is not a doctor finish; it’s handled via the finished queue (doctor creates it).
+                // So we confirm cancel instead.
+              }
+              if (!confirm('Cancel this booking?')) return
+              onSetStatus(a._id, 'canceled')
+            }}
             title="Reject booking"
           >
             Reject
           </button>
+
 
           <div className="flex items-center gap-xs ml-sm">
             <input

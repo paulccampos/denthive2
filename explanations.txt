@@ -1,0 +1,183 @@
+2.2 Chosen Advanced Database Model/Technology
+
+Chosen technology: MongoDB (document-oriented NoSQL) with an ODM layer (Mongoose) in a Node/Express backend.
+
+Why this is “advanced” for a system design write-up
+1) Flexible schema / schema-on-read
+- MongoDB stores data as BSON documents (JSON-like records). Unlike strict relational schemas, MongoDB allows nested structures and evolving fields without full table migrations.
+- In a healthcare-style workflow (users/patients, appointments, clinical records), fields like procedure markers per tooth can be represented naturally as an array of embedded sub-documents.
+
+2) Object-document mapping (ODM) and application-level modeling
+- Mongoose (used in this project) maps JavaScript objects to MongoDB documents using schemas and validations.
+- This provides a “class-like” programming model (schemas, validation rules, indexes) while still benefiting from document storage.
+
+3) Indexing for query performance
+- Document databases rely heavily on indexes. The project defines indexes at the schema level (e.g., appointmentId in ClinicalRecord, patientId in Appointment and ClinicalRecord), improving performance for common lookups.
+
+Relevant background / research findings (general, widely accepted)
+- NoSQL/document databases are frequently adopted when data requirements are:
+  - frequently evolving,
+  - semi-structured,
+  - best represented as nested records (e.g., variable-length arrays of items).
+- Embedding vs referencing guidance:
+  - Embed data when it is accessed together and has a limited lifecycle.
+  - Reference data when it grows unbounded, needs independent access patterns, or must be shared across many parent records.
+- For MongoDB specifically, the typical performance model is:
+  - Queries are served by indexes wherever possible.
+  - Reads of a single document (or a small number of documents) are efficient.
+  - Data modeling choices (embedding vs referencing) strongly impact query patterns and performance.
+
+How the chosen model maps to this project’s data
+- Appointment documents store scheduling and status fields and can include an array such as toothFlags.
+- ClinicalRecord documents store a variable-length list of procedures (array of objects with tooth/procedure/extracted).
+- HistoryAppointment documents “snapshot” appointment details for completed/canceled bookings, keeping an immutable audit trail. This is a common pattern: keep operational data separate from audit/history to preserve correctness and simplify reads.
+
+3. System Design
+
+3.1 System Architecture
+
+Overall architecture (logical layers)
+1) Frontend (React SPA)
+- Provides UI pages (Login/Signup, Doctor/Secretary booking views, Queue management, etc.).
+- Makes HTTP requests to the backend API.
+
+2) Backend API (Node.js + Express)
+- Exposes REST endpoints under /api/*.
+- Handles authentication (JWT) and role-based access.
+- Coordinates business logic:
+  - creating appointments,
+  - updating queue status,
+  - writing clinical records,
+  - moving completed/canceled appointments into history,
+  - retrieving procedure/price information.
+
+3) Data access layer (Mongoose models)
+- Defines schemas for collections such as Appointment, ClinicalRecord, HistoryAppointment, ProcedurePrice, User, Patient.
+- Enforces basic validation and adds indexes.
+
+4) Database (MongoDB)
+- Stores documents for the above collections.
+- Indexes support frequent query paths such as:
+  - fetch clinical record by appointmentId,
+  - list appointments by doctor status/queue position,
+  - fetch patient history.
+
+Component interactions (typical flows)
+A) Booking creation flow
+- Frontend sends request: create appointment (patientId, serviceType, preferredDoctor, scheduledAt, toothFlags).
+- Backend validates request + auth role.
+- Backend creates an Appointment document in MongoDB.
+- Backend returns appointment details to frontend.
+
+B) Doctor “next / calling / in progress” flow (queue state)
+- Frontend triggers status update.
+- Backend updates status and potentially queuePosition.
+- Backend returns updated appointment(s) for rendering queue UI.
+
+C) Finish appointment flow -> clinical record + history snapshot
+- Backend creates ClinicalRecord for the appointment, embedding procedures as an array of {tooth, procedure, extracted}.
+- Backend calculates/stores pricePHP (from pricing logic or lookup).
+- Backend writes a HistoryAppointment document that preserves appointment snapshot fields + appointmentId reference.
+- Backend returns history data to frontend.
+
+Data distribution/replication discussion (since MongoDB is used)
+- In a single-instance deployment, there is one primary copy of documents.
+- In a production distributed MongoDB deployment, sharding and replication can be enabled:
+  - Replication: multiple nodes keep copies; primary handles writes, secondaries replicate.
+  - Sharding: collections can be partitioned by a shard key to distribute data.
+- For this application’s common access patterns (by patientId, appointmentId, doctor/queue status), typical sharding considerations would be:
+  - shard on patientId or appointmentId depending on dominant query patterns,
+  - ensure indexes align with shard key for targeted queries,
+  - replicate for availability and read scaling.
+
+Query processing techniques (practical view for document databases)
+- Index-driven query execution:
+  - Queries should include indexed fields (e.g., patientId, appointmentId) to avoid full collection scans.
+- Projection:
+  - Request only needed fields to reduce payload size.
+- Denormalization / embedding:
+  - Embed small substructures (like procedure markers) to avoid additional queries.
+- Audit/history reads:
+  - HistoryAppointment snapshots reduce the need to join back to Appointment for historical displays.
+
+3.2 Design Diagrams
+
+Diagram 1: System architecture (text diagram)
+
+[ React SPA (frontend-react) ]
+            |
+            |  HTTPS (REST)
+            v
+[ Express API server (backend/server.js) ]
+   |         |            |            |
+   | auth    | queue     | clinical   | pricing/history
+   v         v            v            v
+[ MongoDB via Mongoose models ]
+   - Appointment
+   - ClinicalRecord
+   - HistoryAppointment
+   - User / Patient / ProcedurePrice
+
+Diagram 2: Document/class-style relationships (conceptual)
+
+Appointment (collection: appointments)
+  - patientId -> Patient
+  - createdByUserId -> User
+  - toothFlags: [String]
+  - status, scheduledAt, queuePosition
+
+ClinicalRecord (collection: clinicalrecords)
+  - patientId -> Patient
+  - appointmentId -> Appointment
+  - procedures: [ { tooth, procedure, extracted } ]  (embedded array)
+  - consultationNotes
+  - pricePHP
+
+HistoryAppointment (collection: history)
+  - patientId -> Patient
+  - appointmentId -> Appointment  (link for clinical record lookup)
+  - snapshot of appointment fields + status timestamps
+
+Diagram 3: Class diagram (conceptual, derived from Mongoose schemas)
+
++--------------------+        +--------------------+
+| Appointment        |<>------| Patient           |
+|--------------------|        +--------------------+
+| patientId          |
+| patientNameSnapshot|
+| serviceType        |
+| preferredDoctor    |
+| scheduledAt        |
+| toothFlags[]       |
+| status             |
+| queuePosition      |
++--------------------+        
+
++--------------------+
+| ClinicalRecord    |
+|--------------------|
+| patientId          |<>----- Patient
+| appointmentId      |<>----- Appointment
+| procedures[]       |  (embedded subdocuments)
+| consultationNotes  |
+| pricePHP           |
+| status             |
++--------------------+
+
++------------------------+
+| HistoryAppointment     |
+|------------------------|
+| patientId              |
+| appointmentId          |
+| serviceType            |
+| preferredDoctor        |
+| scheduledAt            |
+| toothFlags[]           |
+| queuePosition          |
+| status                 |
+| checkedInAt/Completed |
+| historyReason          |
++------------------------+
+
+End of explanations.txt
+
