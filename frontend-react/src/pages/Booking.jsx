@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../lib/api'
+import SecretarySidebar from '../components/SecretarySidebar.jsx'
+
 
 const TEETH = [
   // Upper jaw (left -> right): 16 15 14 13 12 11 10  9 |  8  7  6  5  4  3  2  1
@@ -302,7 +304,8 @@ export default function Booking() {
         </div>
       </header>
 
-      <main className="p-margin-desktop md:p-xl">
+      <main className="p-margin-desktop md:p-xl md:ml-0 lg:ml-64">
+
         <div className="max-w-6xl mx-auto space-y-lg">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
             <div className="lg:col-span-8 space-y-lg">

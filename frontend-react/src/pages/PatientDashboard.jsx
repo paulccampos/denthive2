@@ -108,7 +108,7 @@ export default function PatientDashboard() {
         </div>
       </aside>
 
-      <main className="flex flex-col min-h-screen">
+      <main className="ml-64 flex flex-col min-h-screen">
         <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
 
           <div className="flex items-center gap-md">
@@ -419,11 +419,55 @@ export default function PatientDashboard() {
 
           <div>
             <h3 className="font-headline-md text-headline-md">Your profile</h3>
-            {patient ? (
-              <pre className="bg-surface-container-lowest p-md rounded-xl border border-outline-variant">{JSON.stringify(patient, null, 2)}</pre>
-            ) : (
-              <p>Loading patient data...</p>
-            )}
+            <div className="border border-outline-variant rounded-xl p-md bg-surface-container-lowest">
+              {patient ? (
+                <div className="space-y-md">
+                  <div className="flex items-center justify-between gap-md">
+                    <div>
+                      <p className="font-label-caps text-label-caps text-outline">PATIENT</p>
+                      <p className="font-title-sm text-on-surface">
+                        {(patient?.name && String(patient.name)) || (patient?.fullName && String(patient.fullName)) || '—'}
+                      </p>
+                      <p className="text-xs text-on-surface-variant">
+                        Patient ID: {patient?._id || patient?.patientId || '—'}
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 rounded-full border border-primary bg-surface-container-highest flex items-center justify-center">
+                      <span className="material-symbols-outlined text-primary">person</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+                    <div className="space-y-xs">
+                      <p className="text-xs text-on-surface-variant font-label-caps">Phone</p>
+                      <p className="font-body-md text-on-surface">{patient?.phone || '—'}</p>
+                    </div>
+                    <div className="space-y-xs">
+                      <p className="text-xs text-on-surface-variant font-label-caps">Email</p>
+                      <p className="font-body-md text-on-surface">{patient?.email || '—'}</p>
+                    </div>
+                    <div className="space-y-xs">
+                      <p className="text-xs text-on-surface-variant font-label-caps">DOB</p>
+                      <p className="font-body-md text-on-surface">
+                        {patient?.dob ? new Date(patient.dob).toLocaleDateString() : '—'}
+                      </p>
+                    </div>
+                    <div className="space-y-xs">
+                      <p className="text-xs text-on-surface-variant font-label-caps">Gender</p>
+                      <p className="font-body-md text-on-surface">{patient?.gender || '—'}</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-md border-t border-outline-variant">
+                    <p className="text-xs text-on-surface-variant">
+                      This section is a compact view of your patient record. Clinical notes are managed by your dentist/doctor.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p>Loading patient data...</p>
+              )}
+            </div>
           </div>
         </div>
       </main>

@@ -43,8 +43,9 @@ export default function SecretarySidebar({ currentPathname }) {
         <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
           <span className="material-symbols-outlined text-white">dentistry</span>
         </div>
-        <h1 className="mt-sm font-headline-md text-headline-md font-bold text-primary">DentHive</h1>
+        <h1 className="mt-sm font-headline-md text-headline-md font-bold text-primary">DentaCare</h1>
         <p className="font-label-caps text-label-caps text-outline">Secretary Portal</p>
+
       </div>
 
       <nav className="flex-1 mt-md space-y-xs px-sm overflow-y-auto no-scrollbar">
