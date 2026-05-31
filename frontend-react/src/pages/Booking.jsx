@@ -1,7 +1,44 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../lib/api'
 
-const TEETH = ['Upper 1', 'Upper 2', 'Upper 3', 'Upper 4', 'Upper 5', 'Upper 16', 'Upper 15', 'Upper 14', 'Upper 13', 'Upper 12', 'Upper 11', 'Upper 10', 'Upper 9', 'Upper 8', 'Upper 7', 'Upper 6', 'Lower 1', 'Lower 2', 'Lower 3', 'Lower 4', 'Lower 5', 'Lower 16', 'Lower 15', 'Lower 14', 'Lower 13', 'Lower 12', 'Lower 11', 'Lower 10', 'Lower 9', 'Lower 8', 'Lower 7', 'Lower 6']
+const TEETH = [
+  // Upper jaw (left -> right): 16 15 14 13 12 11 10  9 |  8  7  6  5  4  3  2  1
+  '16 - Third Molar (Wisdom Tooth)',
+  '15 - Second Molar',
+  '14 - First Molar',
+  '13 - Second Premolar (Second Bicuspid)',
+  '12 - First Premolar (First Bicuspid)',
+  '11 - Canine (Cuspid)',
+  '10 - Lateral Incisor',
+  '9 - Central Incisor',
+  '8 - Central Incisor',
+  '7 - Lateral Incisor',
+  '6 - Canine (Cuspid)',
+  '5 - First Premolar (First Bicuspid)',
+  '4 - Second Premolar (Second Bicuspid)',
+  '3 - First Molar',
+  '2 - Second Molar',
+  '1 - Third Molar (Wisdom Tooth)',
+
+  // Lower jaw (left -> right): 17 18 19 20 21 22 23 24 | 25 26 27 28 29 30 31 32
+  '17 - Third Molar (Wisdom Tooth)',
+  '18 - Second Molar',
+  '19 - First Molar',
+  '20 - Second Premolar',
+  '21 - First Premolar',
+  '22 - Canine',
+  '23 - Lateral Incisor',
+  '24 - Central Incisor',
+  '25 - Central Incisor',
+  '26 - Lateral Incisor',
+  '27 - Canine',
+  '28 - First Premolar',
+  '29 - Second Premolar',
+  '30 - First Molar',
+  '31 - Second Molar',
+  '32 - Third Molar (Wisdom Tooth)',
+]
+
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
@@ -247,7 +284,8 @@ export default function Booking() {
     <div className="bg-background text-on-background overflow-x-hidden">
 
       {/* removed duplicated frame when embedded in PatientPortalShell */}
-      <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+      <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-10 bg-surface border-b border-outline-variant">
+
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-md">
           <div>
             <h1 className="font-display-lg text-display-lg text-on-surface mb-xs">Book Appointment</h1>
@@ -542,7 +580,8 @@ export default function Booking() {
 
 
                 <div className="flex flex-col md:flex-row gap-lg items-center justify-center">
-                  <div className="w-full max-w-[400px] bg-surface-container-low p-md rounded-xl border border-outline-variant">
+                    <div className="w-full max-w-[520px] bg-surface-container-low p-md rounded-xl border border-outline-variant">
+                    
                     {/* Simplified SVG: still click-to-toggle, but React-driven */}
                     <svg className="w-full h-auto select-none" viewBox="0 0 420 320" preserveAspectRatio="xMidYMid meet">
                       {/* Oval/open-mouth teeth layout (top + bottom rows) */}

@@ -1,39 +1,43 @@
 import React, { useMemo, useState } from 'react'
 
 const TEETH = [
-  'Upper 1',
-  'Upper 2',
-  'Upper 3',
-  'Upper 4',
-  'Upper 5',
-  'Upper 16',
-  'Upper 15',
-  'Upper 14',
-  'Upper 13',
-  'Upper 12',
-  'Upper 11',
-  'Upper 10',
-  'Upper 9',
-  'Upper 8',
-  'Upper 7',
-  'Upper 6',
-  'Lower 1',
-  'Lower 2',
-  'Lower 3',
-  'Lower 4',
-  'Lower 5',
-  'Lower 16',
-  'Lower 15',
-  'Lower 14',
-  'Lower 13',
-  'Lower 12',
-  'Lower 11',
-  'Lower 10',
-  'Lower 9',
-  'Lower 8',
-  'Lower 7',
-  'Lower 6',
+  // Upper jaw (left -> right): 16 15 14 13 12 11 10  9 |  8  7  6  5  4  3  2  1
+  '16 - Third Molar (Wisdom Tooth)',
+  '15 - Second Molar',
+  '14 - First Molar',
+  '13 - Second Premolar (Second Bicuspid)',
+  '12 - First Premolar (First Bicuspid)',
+  '11 - Canine (Cuspid)',
+  '10 - Lateral Incisor',
+  '9 - Central Incisor',
+  '8 - Central Incisor',
+  '7 - Lateral Incisor',
+  '6 - Canine (Cuspid)',
+  '5 - First Premolar (First Bicuspid)',
+  '4 - Second Premolar (Second Bicuspid)',
+  '3 - First Molar',
+  '2 - Second Molar',
+  '1 - Third Molar (Wisdom Tooth)',
+
+  // Lower jaw (left -> right): 17 18 19 20 21 22 23 24 | 25 26 27 28 29 30 31 32
+  '17 - Third Molar (Wisdom Tooth)',
+  '18 - Second Molar',
+  '19 - First Molar',
+  '20 - Second Premolar',
+  '21 - First Premolar',
+  '22 - Canine',
+  '23 - Lateral Incisor',
+  '24 - Central Incisor',
+  '25 - Central Incisor',
+  '26 - Lateral Incisor',
+  '27 - Canine',
+  '28 - First Premolar',
+  '29 - Second Premolar',
+  '30 - First Molar',
+  '31 - Second Molar',
+  '32 - Third Molar (Wisdom Tooth)',
 ]
+
 
 export default function ToothMap({ selected = [], readOnly = true, onSelectionChange }) {
   const selectedSet = useMemo(() => new Set(selected || []), [selected])
@@ -60,7 +64,7 @@ export default function ToothMap({ selected = [], readOnly = true, onSelectionCh
 
   return (
     <div className="w-full max-w-[420px] bg-surface-container-low p-md rounded-xl border border-outline-variant">
-      <svg className="w-full h-auto select-none" viewBox="0 0 420 320" preserveAspectRatio="xMidYMid meet">
+      <svg className="w-full h-auto select-none" viewBox="0 0 420 320" preserveAspectRatio="xMidYMid meet" style={{ maxHeight: 420 }}>
         <g>
           {top.map((t, idx) => {
             const a = (idx / (top.length - 1)) * Math.PI
@@ -73,9 +77,10 @@ export default function ToothMap({ selected = [], readOnly = true, onSelectionCh
                 key={t}
                 x={x - 8}
                 y={y - 11}
-                width={12}
-                height={20}
-                rx={4}
+                width={18}
+                height={28}
+                rx={6}
+
                 fill={active ? '#1976d2' : 'transparent'}
                 stroke={active ? '#005dac' : '#717783'}
                 strokeWidth={1}
@@ -94,11 +99,11 @@ export default function ToothMap({ selected = [], readOnly = true, onSelectionCh
             return (
               <rect
                 key={t}
-                x={x - 8}
-                y={y - 11}
-                width={12}
-                height={20}
-                rx={4}
+                x={x - 9}
+                y={y - 14}
+                width={18}
+                height={28}
+                rx={6}
                 fill={active ? '#1976d2' : 'transparent'}
                 stroke={active ? '#005dac' : '#717783'}
                 strokeWidth={1}
