@@ -17,8 +17,8 @@ export default function Registry() {
   }, [])
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen">
-      <aside className="h-screen w-64 fixed left-0 top-0 flex flex-col border-r border-outline-variant bg-surface-container-low z-50">
+    <div className="app-page min-h-screen font-body-md">
+      <aside className="app-sidebar h-screen w-64 fixed left-0 top-0 flex flex-col z-50">
 
         <div className="px-md py-lg flex flex-col gap-xs">
           <div className="flex items-center gap-sm mb-lg">
@@ -26,7 +26,7 @@ export default function Registry() {
               <span className="material-symbols-outlined text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>dentistry</span>
             </div>
             <div>
-              <h1 className="font-headline-md text-headline-md font-bold text-primary">DentaCare</h1>
+              <h1 className="font-headline-md text-headline-md font-bold text-primary">DentHive</h1>
               <p className="font-label-caps text-label-caps text-outline uppercase tracking-wider">Dental Management</p>
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function Registry() {
 
 
 
-      <header className="flex justify-between items-center w-[calc(100%-16rem)] ml-64 px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+      <header className="app-header flex justify-between items-center w-[calc(100%-16rem)] ml-64 px-margin-desktop py-sm sticky top-0 z-40">
         <div>
           <h2 className="font-headline-md text-headline-md font-bold text-primary">Patient Registry</h2>
         </div>
@@ -100,7 +100,7 @@ export default function Registry() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 bg-white border-b-2 border-primary z-10">
+              <thead className="sticky top-0 bg-surface-container-lowest border-b-2 border-primary z-10">
                 <tr>
                   <th className="p-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Patient ID</th>
                   <th className="p-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Patient Name</th>

@@ -75,7 +75,7 @@ export default function Login() {
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline-variant">person</span>
                   <input
-                    className="w-full pl-[48px] pr-md py-md bg-white border border-outline-variant rounded-lg font-body-md transition-all focus:border-primary"
+                    className="w-full pl-[48px] pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md transition-all focus:border-primary"
                     id="identity"
                     name="identity"
                     placeholder="dr.smith@denthive.com"
@@ -99,15 +99,23 @@ export default function Login() {
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline-variant">lock</span>
                   <input
-                    className="w-full pl-[48px] pr-md py-md bg-white border border-outline-variant rounded-lg font-body-md transition-all focus:border-primary"
+                    className="w-full pl-[48px] pr-[48px] py-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md transition-all focus:border-primary"
                     id="password"
                     name="password"
                     placeholder="••••••••"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                  <button
+                    type="button"
+                    className="absolute right-md top-1/2 -translate-y-1/2 text-outline-variant hover:text-primary transition-colors"
+                    onClick={() => setShowPassword((s) => !s)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <span className="material-symbols-outlined text-xl">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -166,7 +174,7 @@ export default function Login() {
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZWVJn0ssW7xEzKaPalNskeYwzXItDL0SmiacTcq3WvbrFLniaF5deW1EHbd9BCHFmfOzC_1bnbMdwNypRLl7qmqvGe-VOCuRQmUqaV4S0tqdSgw7qPUEznv8V8Lei6xAy8Nq-FftvqrPDGbzd32gohL320E8E1Z_0T6kxAi1uwhphf8T25fYcUgrN05hTSuopHZD-vhAlUClMeVxSUChUD1ELChhdlpj4xQ0O03KKMLgdzMM_eI8MZYd1QLJqYrHcMVZcml5Ata8w"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent flex items-end p-xl">
-            <div className="bg-white/80 backdrop-blur-md p-lg rounded-xl border border-white/20 max-w-md login-card-shadow">
+            <div className="glass-card p-lg rounded-xl max-w-md login-card-shadow">
               <div className="flex gap-xs mb-sm">
                 <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                 <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
@@ -193,14 +201,14 @@ export default function Login() {
           </div>
 
           <div className="absolute top-margin-desktop right-margin-desktop space-y-md">
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center animate-bounce" style={{ animationDuration: '3s' }}>
-              <span className="material-symbols-outlined text-white">monitoring</span>
+            <div className="w-12 h-12 rounded-full bg-on-primary/15 backdrop-blur-sm border border-on-primary/25 flex items-center justify-center animate-bounce" style={{ animationDuration: '3s' }}>
+              <span className="material-symbols-outlined text-on-primary">monitoring</span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '4s' }}>
-              <span className="material-symbols-outlined text-white">calendar_today</span>
+            <div className="w-12 h-12 rounded-full bg-on-primary/15 backdrop-blur-sm border border-on-primary/25 flex items-center justify-center animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '4s' }}>
+              <span className="material-symbols-outlined text-on-primary">calendar_today</span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center animate-bounce" style={{ animationDelay: '1s', animationDuration: '3.5s' }}>
-              <span className="material-symbols-outlined text-white">shield_with_heart</span>
+            <div className="w-12 h-12 rounded-full bg-on-primary/15 backdrop-blur-sm border border-on-primary/25 flex items-center justify-center animate-bounce" style={{ animationDelay: '1s', animationDuration: '3.5s' }}>
+              <span className="material-symbols-outlined text-on-primary">shield_with_heart</span>
             </div>
           </div>
         </section>

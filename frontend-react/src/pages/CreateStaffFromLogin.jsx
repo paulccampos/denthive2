@@ -41,7 +41,7 @@ export default function CreateStaffFromLogin({ onCreated }) {
 
   return (
     <form onSubmit={submit} className="space-y-md">
-      <div className="mt-md bg-white/70 backdrop-blur-md border border-outline-variant rounded-xl p-md text-left">
+      <div className="mt-md glass-card p-md text-left">
         <h3 className="font-headline-md text-headline-md text-on-background mb-xs">Create Staff (Admin Only)</h3>
         <p className="text-[13px] text-on-surface-variant mb-md">
           You must already be logged in as an <b>admin</b>. Then you can create doctor/secretary/admin accounts.

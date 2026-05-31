@@ -4,11 +4,10 @@ import HtmlLikeShell from './HtmlLikeShell'
 /**
  * Keeps the patient portal frame (sidebar + topbar) mounted while swapping content.
  */
-export default function PatientPortalShell({ children }) {
+export default function PatientPortalShell({ children, pageTitle, userName }) {
   return (
-    <HtmlLikeShell variant="patient">
+    <HtmlLikeShell variant="patient" pageTitle={pageTitle} userName={userName}>
       {children}
     </HtmlLikeShell>
   )
 }
-

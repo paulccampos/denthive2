@@ -38,10 +38,10 @@ function isActive(href, currentPathname) {
 
 export default function SecretarySidebar({ currentPathname }) {
   return (
-    <aside className="flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant z-50">
+    <aside className="app-sidebar flex flex-col h-screen w-64 fixed left-0 top-0 z-50">
       <div className="p-lg">
         <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-          <span className="material-symbols-outlined text-white">dentistry</span>
+          <span className="material-symbols-outlined text-on-primary">dentistry</span>
         </div>
         <h1 className="mt-sm font-headline-md text-headline-md font-bold text-primary">DentaCare</h1>
         <p className="font-label-caps text-label-caps text-outline">Secretary Portal</p>
