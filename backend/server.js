@@ -13,6 +13,7 @@ const { pricesRouter } = require('./routes/prices');
 const { historyRouter } = require('./routes/history');
 const { doctorAppointmentsRouter } = require('./routes/doctorAppointments');
 const { finishedRouter } = require('./routes/finished');
+const { doctorsRouter } = require('./routes/doctors');
 
 
 
@@ -22,6 +23,7 @@ const { finishedRouter } = require('./routes/finished');
 
 
 const app = express();
+
 
 
 app.use(cors({ origin: true, credentials: true }));
@@ -80,7 +82,9 @@ async function start() {
 app.use('/api/admin', adminRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/doctor-appointments', doctorAppointmentsRouter);
+app.use('/api/doctors', doctorsRouter);
 app.use('/api/finished', finishedRouter);
+
 
 
 

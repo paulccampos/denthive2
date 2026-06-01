@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import ToothMap from '../components/ToothMap'
+import PatientProfileEditor from './PatientProfileEditor'
+
 
 function formatScheduledAt(value) {
   if (!value) return '-'
@@ -417,10 +419,11 @@ export default function PatientDashboard() {
             </div>
           </div>
 
-          <div>
-            <h3 className="font-headline-md text-headline-md">Your profile</h3>
+          <div className="lg:col-span-4">
+            <h3 className="font-headline-md text-headline-md mb-md">Your profile</h3>
+
             {patient ? (
-              <pre className="bg-surface-container-lowest p-md rounded-xl border border-outline-variant">{JSON.stringify(patient, null, 2)}</pre>
+              <PatientProfileEditor patient={patient} onSaved={(next) => setPatient(next)} />
             ) : (
               <p>Loading patient data...</p>
             )}

@@ -1,8 +1,8 @@
 # TODO
 
-- [ ] Make `/doctorfinished` reliably load the correct appointment (and show patient/booking details)
-- [ ] Ensure the Finish button always has a valid `appointmentId`
-- [ ] Update routing/links from `DoctorBookings` to `DoctorFinished` to pass appointmentId
-- [ ] Verify backend move logic: appointment -> `finished` collection via `POST /api/finished/:appointmentId/finish`
-- [ ] Manual test end-to-end
+- [ ] Fix Booking doctor dropdown retrieval for non-admin roles (create non-admin doctor-list endpoint + update Booking to use it)
+- [ ] Replace PatientDashboard “Your profile” raw JSON with a presentable profile card
+- [ ] Implement editable profile for patients (and doctors if requested), “update all fields”
+- [ ] Add frontend form styling + save/refresh behavior
+- [ ] Run frontend build + backend restart; verify in browser
 

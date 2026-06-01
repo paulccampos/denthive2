@@ -2,7 +2,7 @@ import React from 'react'
 import { logout } from '../lib/api'
 
 const SECRETARY_NAV = [
-  // Alphabetical order requested: Patients, Payments, History, Queue, Schedule
+  // Alphabetical order requested: Patients, Payments, History, Queue (no Schedule for secretary portal)
   {
     label: 'Patients',
     icon: 'folder_shared',
@@ -23,12 +23,8 @@ const SECRETARY_NAV = [
     icon: 'group',
     href: '/queuemanagement',
   },
-  {
-    label: 'Schedule',
-    icon: 'calendar_month',
-    href: '/bookingpage',
-  },
 ]
+
 
 
 
@@ -39,6 +35,7 @@ function isActive(href, currentPathname) {
 export default function SecretarySidebar({ currentPathname }) {
   return (
     <aside className="flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant z-50">
+
       <div className="p-lg">
         <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
           <span className="material-symbols-outlined text-white">dentistry</span>

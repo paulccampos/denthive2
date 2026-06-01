@@ -68,6 +68,11 @@ export default function Booking() {
   const [reason, setReason] = useState('General Checkup')
   const [doctor, setDoctor] = useState('Any Available Practitioner')
 
+  const [doctorsLoading, setDoctorsLoading] = useState(false)
+  const [doctorOptions, setDoctorOptions] = useState([{ value: 'Any Available Practitioner', label: 'Any Available Practitioner' }])
+
+
+
   const [time, setTime] = useState('10:30 AM')
   // Calendar state
   const [calendarMonth, setCalendarMonth] = useState(4) // 0-based (May)
@@ -154,6 +159,7 @@ export default function Booking() {
   }
 
   async function fetchAvailability() {
+
     try {
 
       if (!selectedDate?.day) return
@@ -194,11 +200,62 @@ export default function Booking() {
     setSelectedTeeth((cur) => (cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]))
   }
 
+  // Load doctor options from backend (role=doctor)
   useEffect(() => {
     if (!token) return
+
+    ;(async () => {
+      try {
+        setDoctorsLoading(true)
+      const resp = await apiFetch('/doctors')
+        const data = await resp.json()
+
+
+        // Expect: { users: [{ id, username, role }] }
+        if (!resp.ok) throw new Error(data?.error || 'Failed to load doctors')
+
+        const doctors = Array.isArray(data.users)
+          ? data.users
+              .filter((u) => u && u.role === 'doctor')
+              .map((u) => ({
+                id: u.id || String(u.username || u.email || ''),
+                label: `Dr. ${u.username || u.email || 'Practitioner'}`,
+              }))
+          : []
+
+        const options = [
+          { value: 'Any Available Practitioner', label: 'Any Available Practitioner' },
+          ...doctors,
+        ]
+
+        // Deduplicate by value (preserve order)
+        const seen = new Set()
+        const unique = []
+        for (const opt of options) {
+          if (!seen.has(opt.value || opt.label)) {
+            seen.add(opt.value || opt.label)
+            unique.push(opt)
+          }
+        }
+
+        // Convert to the shape used by the <select>
+        setDoctorOptions(unique)
+
+      } catch {
+        // keep default options
+      } finally {
+        setDoctorsLoading(false)
+      }
+    })()
+  }, [token])
+
+  useEffect(() => {
+    if (!token) return
+
     ;(async () => {
       try {
         const resp = await apiFetch('/patients/me')
+
         const data = await resp.json()
         if (!resp.ok) return
 
@@ -302,7 +359,7 @@ export default function Booking() {
         </div>
       </header>
 
-      <main className="p-margin-desktop md:p-xl">
+      <main className="p-margin-desktop md:p-xl booking-page-main">
         <div className="max-w-6xl mx-auto space-y-lg">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
             <div className="lg:col-span-8 space-y-lg">
@@ -355,13 +412,17 @@ export default function Booking() {
                       <select
                         className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
                         value={doctor}
+                        disabled={doctorsLoading}
                         onChange={(e) => setDoctor(e.target.value)}
                       >
-                        <option>Dr. Elena Rodriguez (General)</option>
-                        <option>Dr. Marcus Chen (Orthodontist)</option>
-                        <option>Dr. Sarah Jenkins (Periodontist)</option>
-                        <option>Any Available Practitioner</option>
+                        {doctorOptions.map((d) => (
+                          <option key={d.value} value={d.value}>
+                            {d.label}
+                          </option>
+                        ))}
                       </select>
+
+
                       <span className="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
                     </div>
                   </div>

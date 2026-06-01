@@ -109,7 +109,9 @@ export default function HtmlLikeShell({ variant, userName, children }) {
       </header>
 
       {/* Content */}
-      <main className="flex-1 pt-4">{children}</main>
+      <main className="flex-1 pt-0 pl-64">{children}</main>
+
+
 
     </div>
   )

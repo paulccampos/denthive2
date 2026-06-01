@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { apiFetch, logout } from '../lib/api'
-
+import SecretarySidebar from '../components/SecretarySidebar.jsx'
 
 function moneyPHP(n) {
   if (typeof n !== 'number' || Number.isNaN(n)) return '-'
@@ -8,7 +8,6 @@ function moneyPHP(n) {
 }
 
 function formatDateTime(dt) {
-
   if (!dt) return '-'
   return new Date(dt).toLocaleString()
 }
@@ -35,7 +34,6 @@ export default function SecretaryHistory() {
   const [clinicalLoading, setClinicalLoading] = useState(false)
   const [clinicalRecords, setClinicalRecords] = useState([])
 
-
   async function load() {
     setLoading(true)
     try {
@@ -54,7 +52,6 @@ export default function SecretaryHistory() {
         throw new Error(msg)
       }
       setItems(data.history || data.items || [])
-
     } catch (e) {
       alert(e.message)
     } finally {
@@ -73,7 +70,6 @@ export default function SecretaryHistory() {
       return
     }
 
-    // Depends on HistoryAppointment.appointmentId linkage.
     const appointmentId = selectedItem.appointmentId
     if (!appointmentId) {
       setClinicalRecords([])
@@ -103,13 +99,14 @@ export default function SecretaryHistory() {
   }, [selected])
 
   async function permanentlyDelete(id) {
-
     if (!confirm('Permanently delete this record?')) return
     setLoading(true)
     try {
       const resp = await apiFetch(`/history/${encodeURIComponent(id)}`, { method: 'DELETE' })
       const contentType = resp.headers.get('content-type') || ''
-      const data = contentType.includes('application/json') ? await resp.json() : { error: await resp.text() }
+      const data = contentType.includes('application/json')
+        ? await resp.json()
+        : { error: await resp.text() }
       if (!resp.ok) throw new Error(data.error || 'Delete failed')
 
       setSelected(null)
@@ -121,14 +118,15 @@ export default function SecretaryHistory() {
     }
   }
 
-  // Move back to appointments as a reschedulable booking.
   async function restoreToAppointments(id) {
     if (!confirm('Move this history record back to appointments?')) return
     setLoading(true)
     try {
       const resp = await apiFetch(`/history/${encodeURIComponent(id)}/restore`, { method: 'POST' })
       const contentType = resp.headers.get('content-type') || ''
-      const data = contentType.includes('application/json') ? await resp.json() : { error: await resp.text() }
+      const data = contentType.includes('application/json')
+        ? await resp.json()
+        : { error: await resp.text() }
       if (!resp.ok) throw new Error(data.error || 'Restore failed')
 
       setSelected(null)
@@ -145,48 +143,11 @@ export default function SecretaryHistory() {
     []
   )
 
+  const currentPathname = typeof window !== 'undefined' ? window.location.pathname : '/'
+
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden">
-      <aside className="flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant z-50">
-
-        <div className="p-lg">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <span className="material-symbols-outlined text-white">dentistry</span>
-          </div>
-          <h1 className="mt-sm font-headline-md text-headline-md font-bold text-primary">DentHive</h1>
-
-          <p className="font-label-caps text-label-caps text-outline">Secretary Portal</p>
-        </div>
-        <nav className="flex-1 mt-md space-y-xs px-sm overflow-y-auto no-scrollbar">
-          {/* Secretary fixed navbar options */}
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/queuemanagement">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
-            <span className="font-label-caps text-label-caps">Queue</span>
-          </a>
-
-          {/* (Intentionally no Patients/Schedule shortcuts here to keep role-fixed navigation) */}
-
-          <a className="bg-primary-container text-on-primary-container font-bold px-md py-sm flex items-center gap-sm rounded-lg border-r-4 border-primary transition-all" href="/history">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>history</span>
-            <span className="font-label-caps text-label-caps">History</span>
-          </a>
-        </nav>
-
-        <div className="p-md border-t border-outline-variant mt-auto">
-          <button
-            type="button"
-            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95"
-            onClick={() => {
-              logout()
-              window.location.href = '/'
-            }}
-          >
-            <span className="material-symbols-outlined">logout</span>
-            Logout
-          </button>
-        </div>
-
-      </aside>
+      <SecretarySidebar currentPathname={currentPathname} />
 
       <main className="ml-64 p-margin-desktop">
         <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
@@ -205,7 +166,12 @@ export default function SecretaryHistory() {
                 <option key={s} value={s}>{s === '' ? 'All' : s}</option>
               ))}
             </select>
-            <button type="button" className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={load} disabled={loading}>
+            <button
+              type="button"
+              className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all"
+              onClick={load}
+              disabled={loading}
+            >
               {loading ? 'Loading...' : 'Refresh'}
             </button>
           </div>
@@ -225,20 +191,26 @@ export default function SecretaryHistory() {
                     Close
                   </button>
                 </div>
+
                 <div className="px-md py-md space-y-sm text-body-md">
-                  {/* Clinical Records (procedure + pricePHP) */}
                   <div className="bg-surface-container-low border border-outline-variant rounded-xl px-md py-sm">
                     <div className="flex justify-between items-center">
                       <div>
                         <div className="text-xs text-on-surface-variant font-label-caps">Clinical Records</div>
-                        <div className="font-bold mt-xs">{clinicalLoading ? 'Loading…' : clinicalRecords.length ? `${clinicalRecords.length} record(s)` : 'No clinical record'}</div>
+                        <div className="font-bold mt-xs">
+                          {clinicalLoading
+                            ? 'Loading…'
+                            : clinicalRecords.length
+                              ? `${clinicalRecords.length} record(s)`
+                              : 'No clinical record'}
+                        </div>
                       </div>
                       <div>
                         {clinicalRecords.length ? (
-                          <div className="text-xs text-on-surface-variant font-label-caps text-right">Price</div>
-                        ) : null}
-                        {clinicalRecords.length ? (
-                          <div className="font-bold text-right">{moneyPHP(clinicalRecords[0].pricePHP)}</div>
+                          <>
+                            <div className="text-xs text-on-surface-variant font-label-caps text-right">Price</div>
+                            <div className="font-bold text-right">{moneyPHP(clinicalRecords[0].pricePHP)}</div>
+                          </>
                         ) : (
                           <div className="font-bold text-right">-</div>
                         )}
@@ -246,24 +218,21 @@ export default function SecretaryHistory() {
                     </div>
 
                     <div className="pt-sm space-y-xs">
-                      {clinicalRecords.length ? (
-                        clinicalRecords[0].procedures?.length ? (
-                          clinicalRecords[0].procedures.map((p, idx) => (
-                            <div key={`${clinicalRecords[0]._id || 'rec'}-${idx}`} className="text-body-md">
-                              <div className="text-xs text-on-surface-variant font-label-caps">Procedure {idx + 1}</div>
-                              <div className="font-bold">{p.procedure || '-'}</div>
-                              <div className="text-xs text-on-surface-variant">Tooth: {p.tooth || '-'}</div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-on-surface-variant">No procedures found.</div>
-                        )
-                      ) : null}
+                      {clinicalRecords.length && clinicalRecords[0].procedures?.length ? (
+                        clinicalRecords[0].procedures.map((p, idx) => (
+                          <div key={`${clinicalRecords[0]._id || 'rec'}-${idx}`} className="text-body-md">
+                            <div className="text-xs text-on-surface-variant font-label-caps">Procedure {idx + 1}</div>
+                            <div className="font-bold">{p.procedure || '-'}</div>
+                            <div className="text-xs text-on-surface-variant">Tooth: {p.tooth || '-'}</div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-on-surface-variant">No procedures found.</div>
+                      )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
-
                     <div>
                       <div className="text-xs text-on-surface-variant font-label-caps">Patient</div>
                       <div className="font-bold">{selected.patientName || selected.patientNameSnapshot || '-'}</div>

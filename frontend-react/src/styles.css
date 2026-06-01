@@ -79,4 +79,8 @@ body {
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
+/* Booking page spacing so sticky navbar doesn't overlap content */
+.booking-page-main {
+  padding-top: 140px;
+}
 
