@@ -1,13 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { apiFetch, logout } from '../lib/api'
+import { apiFetch } from '../lib/api'
 import SecretarySidebar from '../components/SecretarySidebar.jsx'
 
 function moneyPHP(n) {
+
   if (typeof n !== 'number' || Number.isNaN(n)) return '-'
   return `₱${Number(n).toLocaleString('en-PH')}`
 }
 
 function formatDateTime(dt) {
+
   if (!dt) return '-'
   return new Date(dt).toLocaleString()
 }
@@ -16,9 +18,9 @@ function statusBadge(status) {
   const s = (status || '').toUpperCase()
   const badgeClass =
     status === 'completed'
-      ? 'bg-secondary text-white'
+      ? 'bg-secondary text-on-secondary'
       : status === 'canceled' || status === 'archived'
-        ? 'bg-error text-white'
+        ? 'bg-error text-on-error'
         : 'bg-primary-container text-on-primary-container'
 
   return (
@@ -33,6 +35,7 @@ export default function SecretaryHistory() {
   const [selected, setSelected] = useState(null)
   const [clinicalLoading, setClinicalLoading] = useState(false)
   const [clinicalRecords, setClinicalRecords] = useState([])
+
 
   async function load() {
     setLoading(true)
@@ -52,6 +55,7 @@ export default function SecretaryHistory() {
         throw new Error(msg)
       }
       setItems(data.history || data.items || [])
+
     } catch (e) {
       alert(e.message)
     } finally {
@@ -70,6 +74,7 @@ export default function SecretaryHistory() {
       return
     }
 
+    // Depends on HistoryAppointment.appointmentId linkage.
     const appointmentId = selectedItem.appointmentId
     if (!appointmentId) {
       setClinicalRecords([])
@@ -99,14 +104,13 @@ export default function SecretaryHistory() {
   }, [selected])
 
   async function permanentlyDelete(id) {
+
     if (!confirm('Permanently delete this record?')) return
     setLoading(true)
     try {
       const resp = await apiFetch(`/history/${encodeURIComponent(id)}`, { method: 'DELETE' })
       const contentType = resp.headers.get('content-type') || ''
-      const data = contentType.includes('application/json')
-        ? await resp.json()
-        : { error: await resp.text() }
+      const data = contentType.includes('application/json') ? await resp.json() : { error: await resp.text() }
       if (!resp.ok) throw new Error(data.error || 'Delete failed')
 
       setSelected(null)
@@ -118,15 +122,14 @@ export default function SecretaryHistory() {
     }
   }
 
+  // Move back to appointments as a reschedulable booking.
   async function restoreToAppointments(id) {
     if (!confirm('Move this history record back to appointments?')) return
     setLoading(true)
     try {
       const resp = await apiFetch(`/history/${encodeURIComponent(id)}/restore`, { method: 'POST' })
       const contentType = resp.headers.get('content-type') || ''
-      const data = contentType.includes('application/json')
-        ? await resp.json()
-        : { error: await resp.text() }
+      const data = contentType.includes('application/json') ? await resp.json() : { error: await resp.text() }
       if (!resp.ok) throw new Error(data.error || 'Restore failed')
 
       setSelected(null)
@@ -143,14 +146,12 @@ export default function SecretaryHistory() {
     []
   )
 
-  const currentPathname = typeof window !== 'undefined' ? window.location.pathname : '/'
-
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden">
-      <SecretarySidebar currentPathname={currentPathname} />
+    <div className="app-page min-h-screen overflow-x-hidden">
+      <SecretarySidebar currentPathname={window.location.pathname} />
 
       <main className="ml-64 p-margin-desktop">
-        <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+        <header className="flex justify-between items-center w-full px-margin-desktop py-sm app-header sticky top-0 z-40">
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md font-bold text-primary">Appointment History</h2>
           </div>
@@ -166,12 +167,7 @@ export default function SecretaryHistory() {
                 <option key={s} value={s}>{s === '' ? 'All' : s}</option>
               ))}
             </select>
-            <button
-              type="button"
-              className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all"
-              onClick={load}
-              disabled={loading}
-            >
+            <button type="button" className="px-md py-sm bg-primary text-on-primary rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={load} disabled={loading}>
               {loading ? 'Loading...' : 'Refresh'}
             </button>
           </div>
@@ -179,7 +175,7 @@ export default function SecretaryHistory() {
 
         <div className="space-y-lg mt-lg">
           {selected ? (
-            <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center p-md" role="dialog" aria-modal="true">
+            <div className="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-md" role="dialog" aria-modal="true">
               <div className="w-full max-w-2xl bg-surface border border-outline-variant rounded-xl shadow-lg overflow-hidden">
                 <div className="px-md py-sm bg-surface-container flex justify-between items-center border-b border-outline-variant">
                   <h3 className="font-title-sm text-title-sm text-primary">Record Details</h3>
@@ -191,26 +187,20 @@ export default function SecretaryHistory() {
                     Close
                   </button>
                 </div>
-
                 <div className="px-md py-md space-y-sm text-body-md">
+                  {/* Clinical Records (procedure + pricePHP) */}
                   <div className="bg-surface-container-low border border-outline-variant rounded-xl px-md py-sm">
                     <div className="flex justify-between items-center">
                       <div>
                         <div className="text-xs text-on-surface-variant font-label-caps">Clinical Records</div>
-                        <div className="font-bold mt-xs">
-                          {clinicalLoading
-                            ? 'Loading…'
-                            : clinicalRecords.length
-                              ? `${clinicalRecords.length} record(s)`
-                              : 'No clinical record'}
-                        </div>
+                        <div className="font-bold mt-xs">{clinicalLoading ? 'Loading…' : clinicalRecords.length ? `${clinicalRecords.length} record(s)` : 'No clinical record'}</div>
                       </div>
                       <div>
                         {clinicalRecords.length ? (
-                          <>
-                            <div className="text-xs text-on-surface-variant font-label-caps text-right">Price</div>
-                            <div className="font-bold text-right">{moneyPHP(clinicalRecords[0].pricePHP)}</div>
-                          </>
+                          <div className="text-xs text-on-surface-variant font-label-caps text-right">Price</div>
+                        ) : null}
+                        {clinicalRecords.length ? (
+                          <div className="font-bold text-right">{moneyPHP(clinicalRecords[0].pricePHP)}</div>
                         ) : (
                           <div className="font-bold text-right">-</div>
                         )}
@@ -218,21 +208,24 @@ export default function SecretaryHistory() {
                     </div>
 
                     <div className="pt-sm space-y-xs">
-                      {clinicalRecords.length && clinicalRecords[0].procedures?.length ? (
-                        clinicalRecords[0].procedures.map((p, idx) => (
-                          <div key={`${clinicalRecords[0]._id || 'rec'}-${idx}`} className="text-body-md">
-                            <div className="text-xs text-on-surface-variant font-label-caps">Procedure {idx + 1}</div>
-                            <div className="font-bold">{p.procedure || '-'}</div>
-                            <div className="text-xs text-on-surface-variant">Tooth: {p.tooth || '-'}</div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-on-surface-variant">No procedures found.</div>
-                      )}
+                      {clinicalRecords.length ? (
+                        clinicalRecords[0].procedures?.length ? (
+                          clinicalRecords[0].procedures.map((p, idx) => (
+                            <div key={`${clinicalRecords[0]._id || 'rec'}-${idx}`} className="text-body-md">
+                              <div className="text-xs text-on-surface-variant font-label-caps">Procedure {idx + 1}</div>
+                              <div className="font-bold">{p.procedure || '-'}</div>
+                              <div className="text-xs text-on-surface-variant">Tooth: {p.tooth || '-'}</div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-on-surface-variant">No procedures found.</div>
+                        )
+                      ) : null}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+
                     <div>
                       <div className="text-xs text-on-surface-variant font-label-caps">Patient</div>
                       <div className="font-bold">{selected.patientName || selected.patientNameSnapshot || '-'}</div>
@@ -263,7 +256,7 @@ export default function SecretaryHistory() {
                   <div className="pt-sm flex justify-end gap-sm">
                     <button
                       type="button"
-                      className="px-md py-xs bg-primary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+                      className="px-md py-xs bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
                       disabled={loading}
                       onClick={() => restoreToAppointments(selected._id)}
                     >
@@ -271,7 +264,7 @@ export default function SecretaryHistory() {
                     </button>
                     <button
                       type="button"
-                      className="px-md py-xs bg-error text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+                      className="px-md py-xs bg-error text-on-error rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
                       disabled={loading}
                       onClick={() => permanentlyDelete(selected._id)}
                     >
@@ -321,7 +314,7 @@ export default function SecretaryHistory() {
                         <div className="flex justify-end gap-xs">
                           <button
                             type="button"
-                            className="px-sm py-xs bg-primary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+                            className="px-sm py-xs bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
                             disabled={loading}
                             onClick={(e) => {
                               e.stopPropagation()

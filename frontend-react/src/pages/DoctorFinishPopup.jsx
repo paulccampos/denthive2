@@ -110,7 +110,7 @@ export default function DoctorFinishPopup({ appointment, onClose, onFinished }) 
   if (!appointment) return null
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center p-md" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-md" role="dialog" aria-modal="true">
       <div className="w-full max-w-2xl bg-surface border border-outline-variant rounded-xl shadow-lg overflow-hidden">
         <div className="px-md py-sm bg-surface-container flex justify-between items-center border-b border-outline-variant">
           <h3 className="font-title-sm text-title-sm text-primary">Finish Procedure</h3>
@@ -189,7 +189,7 @@ export default function DoctorFinishPopup({ appointment, onClose, onFinished }) 
           <div className="flex justify-end gap-sm mt-lg">
             <button
               type="button"
-              className="px-md py-xs bg-error text-white rounded-lg font-label-caps hover:opacity-90 transition-all"
+              className="px-md py-xs bg-error text-on-error rounded-lg font-label-caps hover:opacity-90 transition-all"
               disabled={loading}
               onClick={onClose}
             >
@@ -197,7 +197,7 @@ export default function DoctorFinishPopup({ appointment, onClose, onFinished }) 
             </button>
             <button
               type="button"
-              className="px-md py-xs bg-primary text-white rounded-lg font-label-caps hover:opacity-90 transition-all"
+              className="px-md py-xs bg-primary text-on-primary rounded-lg font-label-caps hover:opacity-90 transition-all"
               disabled={!canSubmit || loading}
               onClick={() => {
                 if (!confirm('Mark this procedure as FINISHED? This will move it to secretary payment queue.')) return

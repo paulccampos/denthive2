@@ -19,11 +19,11 @@ function statusBadge(status) {
   const s = (status || '').toUpperCase()
   const badgeClass =
     status === 'completed'
-      ? 'bg-secondary text-white'
+      ? 'bg-secondary text-on-secondary'
       : status === 'canceled'
-        ? 'bg-error text-white'
+        ? 'bg-error text-on-error'
         : status === 'archived'
-          ? 'bg-error text-white'
+          ? 'bg-error text-on-error'
           : 'bg-primary-container text-on-primary-container'
 
   return (
@@ -154,12 +154,12 @@ export default function DoctorBookings() {
   }, [])
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden">
+    <div className="app-page min-h-screen overflow-x-hidden">
       {/* Left sidebar */}
-      <aside className="flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant z-50">
+      <aside className="app-sidebar flex flex-col h-screen w-64 fixed left-0 top-0 z-50">
         <div className="p-lg">
           <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <span className="material-symbols-outlined text-white">dentistry</span>
+            <span className="material-symbols-outlined text-on-primary">dentistry</span>
           </div>
           <h1 className="mt-sm font-headline-md text-headline-md font-bold text-primary">DentHive</h1>
           <p className="font-label-caps text-label-caps text-outline">Doctor Portal</p>
@@ -190,7 +190,7 @@ export default function DoctorBookings() {
       </aside>
 
       <main className="ml-64 p-margin-desktop">
-        <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+        <header className="flex justify-between items-center w-full px-margin-desktop py-sm app-header sticky top-0 z-40">
 
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md font-bold text-primary">Doctor Bookings</h2>
@@ -208,7 +208,7 @@ export default function DoctorBookings() {
               <option value="in_progress">in_progress</option>
               <option value="archived">archived</option>
             </select>
-            <button type="button" className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={load} disabled={loading}>
+            <button type="button" className="px-md py-sm bg-primary text-on-primary rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={load} disabled={loading}>
               {loading ? 'Loading...' : 'Refresh'}
             </button>
           </div>
@@ -216,7 +216,7 @@ export default function DoctorBookings() {
 
           <div className="space-y-lg mt-lg">
           {selected ? (
-            <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center p-md" role="dialog" aria-modal="true">
+            <div className="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-md" role="dialog" aria-modal="true">
               <div className="w-full max-w-2xl bg-surface border border-outline-variant rounded-xl shadow-lg overflow-hidden">
 
                 <div className="px-md py-sm bg-surface-container flex justify-between items-center border-b border-outline-variant">
@@ -270,7 +270,7 @@ export default function DoctorBookings() {
                   <div className="pt-sm flex justify-end gap-sm">
                     <button
                       type="button"
-                      className="px-md py-xs bg-error text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+                      className="px-md py-xs bg-error text-on-error rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
                       disabled={loading}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -373,7 +373,7 @@ function DoctorRow({ appointment, statusBadge, timeLabels, todayISO, onSetStatus
         <div className="flex flex-wrap justify-end gap-xs">
           <button
             type="button"
-            className="px-sm py-xs bg-secondary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+            className="px-sm py-xs bg-secondary text-on-secondary rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
             disabled={loading}
             onClick={() => {
               if (!confirmAction('Confirm this booking?')) return
@@ -387,7 +387,7 @@ function DoctorRow({ appointment, statusBadge, timeLabels, todayISO, onSetStatus
           {showFinish ? (
             <button
               type="button"
-              className="px-sm py-xs bg-primary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+              className="px-sm py-xs bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
               disabled={loading}
                       onClick={async () => {
                 if (!confirmAction('Proceed to finish this procedure?')) return
@@ -438,7 +438,7 @@ function DoctorRow({ appointment, statusBadge, timeLabels, todayISO, onSetStatus
             </select>
             <button
               type="button"
-              className="px-sm py-xs bg-primary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+              className="px-sm py-xs bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
               disabled={loading}
               onClick={() => onReschedule(a._id, newDate, newTime)}
               title="Change time/date"

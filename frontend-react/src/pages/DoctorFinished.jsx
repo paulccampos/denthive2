@@ -124,7 +124,7 @@ export default function DoctorFinished() {
   }
 
   return (
-    <div className="bg-background text-on-background font-body-md">
+    <div className="app-page">
       <div className="bg-surface border border-outline-variant rounded-xl p-lg max-w-2xl mx-auto">
         <h2 className="font-headline-md text-headline-md font-bold text-primary mb-md">Finish Procedure</h2>
 
@@ -189,7 +189,7 @@ export default function DoctorFinished() {
         <div className="flex justify-end gap-sm mt-lg">
           <button
             type="button"
-            className="px-md py-xs bg-error text-white rounded-lg font-label-caps hover:opacity-90 transition-all"
+            className="px-md py-xs bg-error text-on-error rounded-lg font-label-caps hover:opacity-90 transition-all"
             disabled={loading}
             onClick={() => (window.location.href = '/doctorbookings')}
           >
@@ -197,7 +197,7 @@ export default function DoctorFinished() {
           </button>
           <button
             type="button"
-            className="px-md py-xs bg-primary text-white rounded-lg font-label-caps hover:opacity-90 transition-all"
+            className="px-md py-xs bg-primary text-on-primary rounded-lg font-label-caps hover:opacity-90 transition-all"
             disabled={!canSubmit || loading}
             onClick={() => {
               if (!confirm('Mark this procedure as FINISHED? This will move it to secretary payment queue.')) return

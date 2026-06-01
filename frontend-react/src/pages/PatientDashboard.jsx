@@ -2,8 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import ToothMap from '../components/ToothMap'
-import PatientProfileEditor from './PatientProfileEditor'
-
 
 function formatScheduledAt(value) {
   if (!value) return '-'
@@ -64,93 +62,33 @@ export default function PatientDashboard() {
   const selectedStatus = (selectedAppointment?.status || '').toUpperCase()
   const selectedBadgeClass =
     selectedAppointment?.status === 'completed'
-      ? 'bg-secondary text-white'
+      ? 'bg-secondary text-on-secondary'
       : selectedAppointment?.status === 'canceled'
-        ? 'bg-error text-white'
+        ? 'bg-error text-on-error'
         : 'bg-primary-container text-on-primary-container'
 
+  const patientName = patient?.fullName || patient?.name || patient?.username || ''
+
   return (
-    <div className="bg-background text-on-background">
-      <aside className="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant z-50">
-
-
-        <div className="p-lg flex items-center gap-sm">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-            <span className="material-symbols-outlined text-white">dentistry</span>
-          </div>
-          <div>
-            <h1 className="font-headline-md text-headline-md font-bold text-primary">DentaCare</h1>
-            <p className="font-label-caps text-label-caps text-outline">Dental Management</p>
-          </div>
+    <div className="p-margin-mobile md:p-margin-desktop space-y-lg">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md">
+        <div>
+          <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">My Records</h1>
+          <p className="text-on-surface-variant font-body-md mt-xs">
+            {patientName ? `Welcome back, ${patientName.split(' ')[0]}` : 'View your treatment history and medical records'}
+          </p>
         </div>
-        <nav className="flex-1 mt-md space-y-xs px-sm">
-          <a className="bg-primary-container text-on-primary-container font-bold px-md py-sm flex items-center gap-sm rounded-lg border-r-4 border-primary transition-all" href="#">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-              dashboard
-            </span>
-            <span className="font-label-caps text-label-caps">Bookings</span>
-          </a>
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/bookingpage">
-            <span className="material-symbols-outlined">calendar_month</span>
-            <span className="font-label-caps text-label-caps">Book Appointment</span>
-          </a>
-        </nav>
-        <div className="mt-auto border-t border-outline-variant px-sm py-md">
-          <button
-            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95 mt-sm"
-            type="button"
-            onClick={() => {
-              localStorage.removeItem('denthiveToken')
-              navigate('/')
-            }}
-          >
-            <span className="material-symbols-outlined">logout</span>
-            Logout
-          </button>
-        </div>
-      </aside>
+        <button
+          type="button"
+          className="px-md py-sm bg-primary text-on-primary rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all inline-flex items-center gap-sm self-start"
+          onClick={() => navigate('/bookingpage')}
+        >
+          <span className="material-symbols-outlined text-sm">add</span>
+          New Booking
+        </button>
+      </div>
 
-      <main className="flex flex-col min-h-screen">
-        <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
-
-          <div className="flex items-center gap-md">
-            <h2 className="font-headline-md text-headline-md font-bold text-primary">Patient Record</h2>
-            <div className="hidden lg:flex items-center bg-surface-container-lowest border border-outline-variant rounded-full px-md py-xs ml-xl">
-              <span className="material-symbols-outlined text-outline text-sm">search</span>
-              <input
-                className="bg-transparent border-none focus:ring-0 text-body-sm w-64"
-                placeholder="Search patient ID or name..."
-                type="text"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-md">
-            <button className="text-on-surface-variant hover:bg-surface-container-high p-sm rounded-full transition-colors relative" type="button">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full" />
-            </button>
-            <button className="text-on-surface-variant hover:bg-surface-container-high p-sm rounded-full transition-colors" type="button">
-              <span className="material-symbols-outlined">help_outline</span>
-            </button>
-            <button className="text-on-surface-variant hover:bg-surface-container-high p-sm rounded-full transition-colors" type="button">
-              <span className="material-symbols-outlined">schedule</span>
-            </button>
-            <div className="h-8 w-px bg-outline-variant mx-xs" />
-            <div className="flex items-center gap-sm">
-              <div className="text-right">
-                <p className="font-title-sm text-on-surface">Dr. Julian Vance</p>
-                <p className="font-label-caps text-label-caps text-outline">Senior Orthodontist</p>
-              </div>
-              <img
-                alt="User Profile"
-                className="w-10 h-10 rounded-full border border-primary object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpulhUwXCyQCVdFDUpZj31RdXJsMUxCWve3jjjFbZfvsvh4Unx5uGaSiE9yno86WkTTiId8KtooDcPXpmu8gLLn9D-ylPc3NPl4-nvC-kMyj4_4NcftRA7HmyI8yg-3CTBHWN5EUId79n6p48B0GQzZkfiUSuWxg1MNyNqLrQrA-TFNdRDYtUb5SDsmwhUbiCq92FfKbSqbSARoVrRHsTM5n8kGOEnFyfNL4W2El3Zc8jMOLekNINt0pZgZ2zWWwC8aOF351-exbrp"
-              />
-            </div>
-          </div>
-        </header>
-
-        <div className="flex-1 p-margin-desktop space-y-lg">
+      <div className="space-y-lg">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
             <div className="lg:col-span-4 space-y-gutter">
               <div className="glass-card rounded-xl p-lg overflow-hidden">
@@ -264,7 +202,7 @@ export default function PatientDashboard() {
                 </div>
                 <button
                   type="button"
-                  className="w-full mt-lg border border-primary text-primary py-sm rounded-lg font-title-sm hover:bg-primary hover:text-white transition-all"
+                  className="w-full mt-lg border border-primary text-primary py-sm rounded-lg font-title-sm hover:bg-primary hover:text-on-primary transition-all"
                   onClick={() => {
                     alert('Dental map is read-only on Patient Dashboard. Select an appointment to preview its tooth flags.');
                   }}
@@ -292,8 +230,8 @@ export default function PatientDashboard() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse dental-table">
                   <thead>
                     <tr className="border-b-2 border-primary">
                       <th className="py-md font-label-caps text-label-caps text-outline px-sm">DATE</th>
@@ -316,9 +254,9 @@ export default function PatientDashboard() {
                         const status = (a.status || '').toUpperCase()
                         const badgeClass =
                           a.status === 'completed'
-                            ? 'bg-secondary text-white'
+                            ? 'bg-secondary text-on-secondary'
                             : a.status === 'canceled'
-                              ? 'bg-error text-white'
+                              ? 'bg-error text-on-error'
                               : 'bg-primary-container text-on-primary-container'
 
                         return (
@@ -409,7 +347,7 @@ export default function PatientDashboard() {
                   </button>
                   <button
                     type="button"
-                    className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all"
+                    className="px-md py-sm bg-primary text-on-primary rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all"
                     onClick={() => (window.location.href = '/bookingpage')}
                   >
                     New Booking
@@ -419,17 +357,64 @@ export default function PatientDashboard() {
             </div>
           </div>
 
-          <div className="lg:col-span-4">
-            <h3 className="font-headline-md text-headline-md mb-md">Your profile</h3>
+          {patient ? (
+            <div className="glass-card rounded-xl p-lg">
+              <h3 className="font-headline-md text-headline-md mb-lg">Your Profile</h3>
+              <div className="space-y-md">
+                <div className="flex items-center justify-between gap-md">
+                  <div>
+                    <p className="font-label-caps text-label-caps text-outline">PATIENT</p>
+                    <p className="font-title-sm text-on-surface">
+                      {(patient?.name && String(patient.name)) || (patient?.fullName && String(patient.fullName)) || '—'}
+                    </p>
+                    <p className="text-xs text-on-surface-variant">
+                      Patient ID: {patient?._id || patient?.patientId || '—'}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full border border-primary bg-surface-container-highest flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary">person</span>
+                  </div>
+                </div>
 
-            {patient ? (
-              <PatientProfileEditor patient={patient} onSaved={(next) => setPatient(next)} />
-            ) : (
-              <p>Loading patient data...</p>
-            )}
-          </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-md">
+                  <div className="space-y-xs">
+                    <p className="font-label-caps text-label-caps text-outline">PHONE</p>
+                    <p className="font-title-sm text-on-surface">{patient?.phone || patient?.contactNumber || '—'}</p>
+                  </div>
+                  <div className="space-y-xs">
+                    <p className="font-label-caps text-label-caps text-outline">EMAIL</p>
+                    <p className="font-title-sm text-on-surface">{patient?.email || '—'}</p>
+                  </div>
+                  <div className="space-y-xs">
+                    <p className="font-label-caps text-label-caps text-outline">DOB</p>
+                    <p className="font-title-sm text-on-surface">
+                      {patient?.dob ? new Date(patient.dob).toLocaleDateString() : '—'}
+                    </p>
+                  </div>
+                  <div className="space-y-xs">
+                    <p className="font-label-caps text-label-caps text-outline">GENDER</p>
+                    <p className="font-title-sm text-on-surface">{patient?.gender || '—'}</p>
+                  </div>
+                </div>
+
+                <div className="pt-md border-t border-outline-variant">
+                  <p className="text-xs text-on-surface-variant">
+                    This section is a compact view of your patient record. Clinical notes are managed by your dentist/doctor.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="glass-card rounded-xl p-lg animate-pulse">
+              <div className="h-6 bg-surface-container-high rounded w-32 mb-md" />
+              <div className="grid grid-cols-4 gap-md">
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className="h-10 bg-surface-container-high rounded" />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </main>
     </div>
   )
 }

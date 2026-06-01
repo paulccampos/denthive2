@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { apiFetch } from '../lib/api'
-import SecretarySidebar from '../components/SecretarySidebar.jsx'
+import { apiFetch, logout } from '../lib/api'
+
 
 function formatDateTime(dt) {
-
   if (!dt) return '-'
   return new Date(dt).toLocaleString()
 }
@@ -12,9 +11,9 @@ function statusBadge(status) {
   const s = (status || '').toUpperCase()
   const badgeClass =
     status === 'completed'
-      ? 'bg-secondary text-white'
+      ? 'bg-secondary text-on-secondary'
       : status === 'canceled'
-        ? 'bg-error text-white'
+        ? 'bg-error text-on-error'
         : 'bg-primary-container text-on-primary-container'
 
   return <span className={`px-sm py-xs rounded-full font-label-caps text-[10px] ${badgeClass}`}>{s}</span>
@@ -117,11 +116,71 @@ export default function SecretaryBookings() {
   }, [])
 
   return (
-      <div className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden">
-      <SecretarySidebar currentPathname={typeof window !== 'undefined' ? window.location.pathname : '/'} />
+    <div className="app-page min-h-screen overflow-x-hidden">
+      {/* Left sidebar */}
+      <aside className="app-sidebar flex flex-col h-screen w-64 fixed left-0 top-0 z-50">
+        <div className="p-lg">
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+            <span className="material-symbols-outlined text-on-primary">dentistry</span>
+          </div>
+          <h1 className="mt-sm font-headline-md text-headline-md font-bold text-primary">DentHive</h1>
+          <p className="font-label-caps text-label-caps text-outline">Secretary Portal</p>
+        </div>
+        <nav className="flex-1 mt-md space-y-xs px-sm overflow-y-auto no-scrollbar">
+          <a className="bg-primary-container text-on-primary-container font-bold px-md py-sm flex items-center gap-sm rounded-lg border-r-4 border-primary transition-all" href="#">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+            <span className="font-label-caps text-label-caps">Bookings</span>
+          </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/secretaryfinished">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>paid</span>
+            <span className="font-label-caps text-label-caps">Finished & Payment</span>
+          </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/registry">
+            <span className="material-symbols-outlined">folder_shared</span>
+            <span className="font-label-caps text-label-caps">Patients</span>
+          </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/secretaryfinished">
+            <span className="material-symbols-outlined">paid</span>
+            <span className="font-label-caps text-label-caps">Payments</span>
+          </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/history">
+            <span className="material-symbols-outlined">history</span>
+            <span className="font-label-caps text-label-caps">History</span>
+          </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/queuemanagement">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
+            <span className="font-label-caps text-label-caps">Queue</span>
+          </a>
+
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/bookingpage">
+            <span className="material-symbols-outlined">calendar_month</span>
+            <span className="font-label-caps text-label-caps">Schedule</span>
+          </a>
+
+        </nav>
+        <div className="p-md border-t border-outline-variant mt-auto">
+          <button
+            type="button"
+            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95"
+            onClick={() => {
+              logout()
+              window.location.href = '/'
+            }}
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Logout
+          </button>
+        </div>
+      </aside>
+
 
       <main className="ml-64 p-margin-desktop">
-        <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+        <header className="flex justify-between items-center w-full px-margin-desktop py-sm app-header sticky top-0 z-40">
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md font-bold text-primary">Secretary Bookings</h2>
           </div>
@@ -143,7 +202,7 @@ export default function SecretaryBookings() {
               {/* <option value="canceled">canceled</option> */}
 
             </select>
-            <button type="button" className="px-md py-sm bg-primary text-white rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={load} disabled={loading}>
+            <button type="button" className="px-md py-sm bg-primary text-on-primary rounded-lg font-title-sm shadow-md hover:shadow-lg transition-all" onClick={load} disabled={loading}>
               {loading ? 'Loading...' : 'Refresh'}
             </button>
           </div>
@@ -151,7 +210,7 @@ export default function SecretaryBookings() {
 
         <div className="space-y-lg mt-lg">
           {selected ? (
-            <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center p-md" role="dialog" aria-modal="true">
+            <div className="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-md" role="dialog" aria-modal="true">
               <div className="w-full max-w-2xl bg-surface border border-outline-variant rounded-xl shadow-lg overflow-hidden">
                 <div className="px-md py-sm bg-surface-container flex justify-between items-center border-b border-outline-variant">
                   <h3 className="font-title-sm text-title-sm text-primary">Booking Details</h3>
@@ -204,7 +263,7 @@ export default function SecretaryBookings() {
                   <div className="pt-sm flex justify-end gap-sm">
                     <button
                       type="button"
-                      className="px-md py-xs bg-error text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+                      className="px-md py-xs bg-error text-on-error rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
                       disabled={loading}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -292,7 +351,7 @@ function SecretaryRow({ appointment, statusBadge, timeLabels, todayISO, onSetSta
         <div className="flex flex-wrap justify-end gap-xs">
           <button
             type="button"
-            className="px-sm py-xs bg-secondary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+            className="px-sm py-xs bg-secondary text-on-secondary rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
             disabled={loading}
             onClick={() => {
               if (!confirm('Confirm this booking?')) return
@@ -344,7 +403,7 @@ function SecretaryRow({ appointment, statusBadge, timeLabels, todayISO, onSetSta
             </select>
             <button
               type="button"
-              className="px-sm py-xs bg-primary text-white rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
+              className="px-sm py-xs bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:opacity-90 transition-all"
               disabled={loading}
               onClick={() => onReschedule(a._id, newDate, newTime)}
               title="Change time/date"

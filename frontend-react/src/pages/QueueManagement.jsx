@@ -99,14 +99,14 @@ export default function QueueManagement() {
   }, [])
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden">
+    <div className="app-page min-h-screen overflow-x-hidden">
 
       <SecretarySidebar currentPathname={window.location.pathname} />
 
 
       {/* Main Content */}
       <main className="ml-64 flex-1">
-        <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+        <header className="app-header flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40">
 
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md font-bold text-primary">Queue Management</h2>
@@ -132,7 +132,7 @@ export default function QueueManagement() {
             <div className="px-md py-sm bg-surface-container flex justify-between items-center border-b-2 border-primary">
               <h3 className="font-title-sm text-title-sm text-primary">Active Queue</h3>
               <div className="flex gap-sm">
-                <button className="flex items-center gap-xs px-sm py-xs bg-white border border-outline-variant rounded hover:bg-surface-container-low transition-colors font-label-caps text-label-caps" type="button">
+                <button className="btn-ghost flex items-center gap-xs px-sm py-xs font-label-caps text-label-caps" type="button">
                   <span className="material-symbols-outlined text-[16px]">filter_list</span>
                   Filter
                 </button>
@@ -174,8 +174,8 @@ export default function QueueManagement() {
                     <td className="px-md py-md font-data-mono">{a.scheduledAt ? new Date(a.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
                     <td className="px-md py-md">{a.assignedTo}</td>
                     <td className="px-md py-md">
-                      <span className="px-sm py-xs bg-primary text-white text-[11px] font-bold rounded-full uppercase tracking-tight flex items-center gap-xs w-fit">
-                        <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                      <span className="px-sm py-xs bg-primary text-on-primary text-[11px] font-bold rounded-full uppercase tracking-tight flex items-center gap-xs w-fit">
+                        <span className="w-1.5 h-1.5 bg-on-primary rounded-full" />
                         {a.status}
                       </span>
                     </td>

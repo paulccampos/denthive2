@@ -47,8 +47,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex">
-      <aside className="flex flex-col h-full border-r border-outline-variant bg-surface-container-low h-screen w-64 fixed left-0 top-0 z-50">
+    <div className="app-page min-h-screen flex">
+      <aside className="app-sidebar flex flex-col h-full h-screen w-64 fixed left-0 top-0 z-50">
         <div className="p-lg flex items-center gap-sm">
           <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
             <span className="material-symbols-outlined text-on-primary">health_metrics</span>
@@ -101,7 +101,7 @@ export default function AdminPage() {
       </aside>
 
       <main className="ml-64 flex-grow min-h-screen">
-        <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+        <header className="app-header flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-40">
           <div className="flex items-center gap-md">
             <h2 className="font-headline-md text-headline-md font-bold text-primary">User Management</h2>
           </div>

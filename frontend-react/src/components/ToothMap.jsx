@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import colors from '../theme/colors.js'
 
 const TEETH = [
   // Upper jaw (left -> right): 16 15 14 13 12 11 10  9 |  8  7  6  5  4  3  2  1
@@ -81,8 +82,8 @@ export default function ToothMap({ selected = [], readOnly = true, onSelectionCh
                 height={28}
                 rx={6}
 
-                fill={active ? '#1976d2' : 'transparent'}
-                stroke={active ? '#005dac' : '#717783'}
+                fill={active ? colors.primaryContainer : 'transparent'}
+                stroke={active ? colors.primary : colors.outline}
                 strokeWidth={1}
                 style={{ cursor: readOnly ? 'default' : 'pointer' }}
                 onClick={() => toggleTooth(t)}
@@ -104,8 +105,8 @@ export default function ToothMap({ selected = [], readOnly = true, onSelectionCh
                 width={18}
                 height={28}
                 rx={6}
-                fill={active ? '#1976d2' : 'transparent'}
-                stroke={active ? '#005dac' : '#717783'}
+                fill={active ? colors.primaryContainer : 'transparent'}
+                stroke={active ? colors.primary : colors.outline}
                 strokeWidth={1}
                 style={{ cursor: readOnly ? 'default' : 'pointer' }}
                 onClick={() => toggleTooth(t)}

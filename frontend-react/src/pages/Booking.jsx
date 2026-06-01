@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../lib/api'
+import colors from '../theme/colors.js'
 
 const TEETH = [
   // Upper jaw (left -> right): 16 15 14 13 12 11 10  9 |  8  7  6  5  4  3  2  1
@@ -67,11 +68,6 @@ export default function Booking() {
 
   const [reason, setReason] = useState('General Checkup')
   const [doctor, setDoctor] = useState('Any Available Practitioner')
-
-  const [doctorsLoading, setDoctorsLoading] = useState(false)
-  const [doctorOptions, setDoctorOptions] = useState([{ value: 'Any Available Practitioner', label: 'Any Available Practitioner' }])
-
-
 
   const [time, setTime] = useState('10:30 AM')
   // Calendar state
@@ -159,7 +155,6 @@ export default function Booking() {
   }
 
   async function fetchAvailability() {
-
     try {
 
       if (!selectedDate?.day) return
@@ -200,62 +195,11 @@ export default function Booking() {
     setSelectedTeeth((cur) => (cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]))
   }
 
-  // Load doctor options from backend (role=doctor)
   useEffect(() => {
     if (!token) return
-
-    ;(async () => {
-      try {
-        setDoctorsLoading(true)
-      const resp = await apiFetch('/doctors')
-        const data = await resp.json()
-
-
-        // Expect: { users: [{ id, username, role }] }
-        if (!resp.ok) throw new Error(data?.error || 'Failed to load doctors')
-
-        const doctors = Array.isArray(data.users)
-          ? data.users
-              .filter((u) => u && u.role === 'doctor')
-              .map((u) => ({
-                id: u.id || String(u.username || u.email || ''),
-                label: `Dr. ${u.username || u.email || 'Practitioner'}`,
-              }))
-          : []
-
-        const options = [
-          { value: 'Any Available Practitioner', label: 'Any Available Practitioner' },
-          ...doctors,
-        ]
-
-        // Deduplicate by value (preserve order)
-        const seen = new Set()
-        const unique = []
-        for (const opt of options) {
-          if (!seen.has(opt.value || opt.label)) {
-            seen.add(opt.value || opt.label)
-            unique.push(opt)
-          }
-        }
-
-        // Convert to the shape used by the <select>
-        setDoctorOptions(unique)
-
-      } catch {
-        // keep default options
-      } finally {
-        setDoctorsLoading(false)
-      }
-    })()
-  }, [token])
-
-  useEffect(() => {
-    if (!token) return
-
     ;(async () => {
       try {
         const resp = await apiFetch('/patients/me')
-
         const data = await resp.json()
         if (!resp.ok) return
 
@@ -338,29 +282,24 @@ export default function Booking() {
 
 
   return (
-    <div className="bg-background text-on-background overflow-x-hidden">
+    <div className="app-page font-body-md overflow-x-hidden">
 
-      {/* removed duplicated frame when embedded in PatientPortalShell */}
-      <header className="flex justify-between items-center w-full px-margin-desktop py-sm sticky top-0 z-10 bg-surface border-b border-outline-variant">
-
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-md">
-          <div>
-            <h1 className="font-display-lg text-display-lg text-on-surface mb-xs">Book Appointment</h1>
-            <p className="text-on-surface-variant font-body-md max-w-xl">
-              Schedule your visit with our specialized practitioners. Please select a treatment type, date, and preferred time slot.
-            </p>
-          </div>
-          <div className="flex gap-sm">
-            <span className="bg-surface-container-high text-primary px-md py-xs rounded-full font-label-caps flex items-center gap-xs">
+      {/* Page content — shell provides sidebar + topbar */}
+      <div className="p-margin-mobile md:p-margin-desktop">
+        <div className="max-w-6xl mx-auto space-y-lg">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-md mb-sm">
+            <div>
+              <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-xs">Book Appointment</h1>
+              <p className="text-on-surface-variant font-body-md max-w-xl">
+                Schedule your visit with our specialized practitioners.
+              </p>
+            </div>
+            <span className="bg-surface-container-high text-primary px-md py-xs rounded-full font-label-caps flex items-center gap-xs self-start">
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>verified_user</span>
               SECURE BOOKING
             </span>
           </div>
-        </div>
-      </header>
 
-      <main className="p-margin-desktop md:p-xl booking-page-main">
-        <div className="max-w-6xl mx-auto space-y-lg">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
             <div className="lg:col-span-8 space-y-lg">
               <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg">
@@ -412,17 +351,13 @@ export default function Booking() {
                       <select
                         className="w-full bg-surface border border-outline-variant rounded-lg px-md py-lg appearance-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
                         value={doctor}
-                        disabled={doctorsLoading}
                         onChange={(e) => setDoctor(e.target.value)}
                       >
-                        {doctorOptions.map((d) => (
-                          <option key={d.value} value={d.value}>
-                            {d.label}
-                          </option>
-                        ))}
+                        <option>Dr. Elena Rodriguez (General)</option>
+                        <option>Dr. Marcus Chen (Orthodontist)</option>
+                        <option>Dr. Sarah Jenkins (Periodontist)</option>
+                        <option>Any Available Practitioner</option>
                       </select>
-
-
                       <span className="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
                     </div>
                   </div>
@@ -515,7 +450,7 @@ export default function Booking() {
                           >
                             {d}
                             {disabled ? <span className="text-[10px]">{d === 1 || d === 2 ? 'Closed' : 'Full'}</span> : null}
-                            {!disabled && isActive ? <span className="absolute bottom-1 w-1 h-1 bg-white rounded-full" /> : null}
+                            {!disabled && isActive ? <span className="absolute bottom-1 w-1 h-1 bg-on-primary rounded-full" /> : null}
                           </button>
                         )
                       })}
@@ -671,8 +606,8 @@ export default function Booking() {
                                     height={20}
                                     rx={4}
 
-                                    fill={selectedTeeth.includes(t) ? '#1976d2' : 'transparent'}
-                                    stroke={selectedTeeth.includes(t) ? '#005dac' : '#717783'}
+                                    fill={selectedTeeth.includes(t) ? colors.primaryContainer : 'transparent'}
+                                    stroke={selectedTeeth.includes(t) ? colors.primary : colors.outline}
                                     strokeWidth={1}
                                     style={{ cursor: 'pointer' }}
                                     onClick={() => toggleTooth(t)}
@@ -693,8 +628,8 @@ export default function Booking() {
                                     height={20}
                                     rx={4}
 
-                                    fill={selectedTeeth.includes(t) ? '#1976d2' : 'transparent'}
-                                    stroke={selectedTeeth.includes(t) ? '#005dac' : '#717783'}
+                                    fill={selectedTeeth.includes(t) ? colors.primaryContainer : 'transparent'}
+                                    stroke={selectedTeeth.includes(t) ? colors.primary : colors.outline}
                                     strokeWidth={1}
                                     style={{ cursor: 'pointer' }}
                                     onClick={() => toggleTooth(t)}
@@ -754,7 +689,7 @@ export default function Booking() {
                             ? 'opacity-30 cursor-not-allowed line-through'
                             : isActive
                               ? 'bg-primary-container text-on-primary-container border-2 border-primary font-bold'
-                              : 'hover:bg-primary hover:text-white')
+                              : 'hover:bg-primary hover:text-on-primary')
                         }
                       >
                         {s}
@@ -768,19 +703,19 @@ export default function Booking() {
                 <div className="absolute -right-4 -top-4 opacity-10">
                   <span className="material-symbols-outlined text-[120px]">calendar_add_on</span>
                 </div>
-                <h3 className="font-label-caps text-white/70 mb-md">APPOINTMENT SUMMARY</h3>
+                <h3 className="font-label-caps text-on-primary/70 mb-md">APPOINTMENT SUMMARY</h3>
                 <div className="space-y-md mb-lg">
                   <div className="flex items-start gap-sm">
                     <span className="material-symbols-outlined mt-1">medical_services</span>
                     <div>
-                      <p className="text-xs text-white/70 font-label-caps">TREATMENT</p>
+                      <p className="text-xs text-on-primary/70 font-label-caps">TREATMENT</p>
                       <p className="font-title-sm">{reason}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-sm">
                     <span className="material-symbols-outlined mt-1">event</span>
                     <div>
-                      <p className="text-xs text-white/70 font-label-caps">WHEN</p>
+                      <p className="text-xs text-on-primary/70 font-label-caps">WHEN</p>
                       <p className="font-title-sm">{MONTH_NAMES[calendarMonth]} {selectedDate.day}, {calendarYear} at {time}</p>
                     </div>
                   </div>
@@ -791,7 +726,7 @@ export default function Booking() {
                       type="button"
                       disabled={loading}
                       onClick={confirmBooking}
-                      className="w-full bg-white text-primary font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-surface-container-low transition-all active:scale-95 shadow-lg"
+                      className="w-full bg-surface-container-lowest text-primary font-bold py-md rounded-lg flex items-center justify-center gap-sm hover:bg-surface-container-low transition-all active:scale-95 shadow-lg"
                     >
                       {loading ? 'CONFIRMING...' : 'CONFIRM BOOKING'}
                       <span className="material-symbols-outlined">arrow_forward</span>
@@ -810,12 +745,12 @@ export default function Booking() {
                   </div>
 
 
-                <p className="text-[10px] text-center mt-md text-white/60">No cancellation fees if canceled 24h prior.</p>
+                <p className="text-[10px] text-center mt-md text-on-primary/60">No cancellation fees if canceled 24h prior.</p>
               </section>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

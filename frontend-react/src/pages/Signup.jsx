@@ -15,7 +15,7 @@ export default function Signup() {
 
   const demoBlock = useMemo(
     () => (
-      <div className="mt-4 bg-white/70 backdrop-blur-md border border-outline-variant rounded-xl p-md text-left">
+      <div className="mt-4 glass-card p-md text-left">
         <p className="font-label-caps text-label-caps text-outline mb-xs">Demo note</p>
         <p className="text-[13px] text-on-surface-variant">
           This is the HTML-like Signup layout. Use your own info (or create a new patient).
@@ -54,7 +54,7 @@ export default function Signup() {
   }
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md overflow-x-hidden">
+    <div className="app-page min-h-screen flex flex-col font-body-md overflow-x-hidden">
       <main className="flex-grow flex flex-col md:flex-row">
         <section className="hidden md:flex md:w-1/2 bg-surface-container-low p-xl flex-col justify-center items-center text-center relative overflow-hidden">
           <div className="z-10 max-w-md">

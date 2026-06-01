@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { apiFetch } from '../lib/api'
-import SecretarySidebar from '../components/SecretarySidebar.jsx'
+import { apiFetch, logout } from '../lib/api'
+
 
 export default function Registry() {
   const [patients, setPatients] = useState([])
+
 
   useEffect(() => {
     ;(async () => {
@@ -11,19 +12,66 @@ export default function Registry() {
         const resp = await apiFetch('/patients')
         const data = await resp.json()
         if (resp.ok) setPatients(data.patients || data)
-      } catch {
-        // ignore
-      }
+      } catch {}
     })()
   }, [])
 
-  const currentPathname = typeof window !== 'undefined' ? window.location.pathname : '/'
-
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen">
-      <SecretarySidebar currentPathname={currentPathname} />
+    <div className="app-page min-h-screen font-body-md">
+      <aside className="app-sidebar h-screen w-64 fixed left-0 top-0 flex flex-col z-50">
 
-      <header className="flex justify-between items-center w-[calc(100%-16rem)] ml-64 px-margin-desktop py-sm sticky top-0 z-40 bg-surface border-b border-outline-variant">
+        <div className="px-md py-lg flex flex-col gap-xs">
+          <div className="flex items-center gap-sm mb-lg">
+            <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+              <span className="material-symbols-outlined text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>dentistry</span>
+            </div>
+            <div>
+              <h1 className="font-headline-md text-headline-md font-bold text-primary">DentHive</h1>
+              <p className="font-label-caps text-label-caps text-outline uppercase tracking-wider">Dental Management</p>
+            </div>
+          </div>
+          <nav className="flex flex-col gap-xs">
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/registry">
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>folder_shared</span>
+              <span className="font-label-caps text-label-caps">Patients</span>
+            </a>
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/secretaryfinished">
+              <span className="material-symbols-outlined">paid</span>
+              <span className="font-label-caps text-label-caps">Payments</span>
+            </a>
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/history">
+              <span className="material-symbols-outlined">history</span>
+              <span className="font-label-caps text-label-caps">History</span>
+            </a>
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/queuemanagement">
+              <span className="material-symbols-outlined">group</span>
+              <span className="font-label-caps text-label-caps">Queue</span>
+            </a>
+            <a className="text-on-surface-variant px-md py-sm flex items-center gap-sm hover:bg-surface-container-highest transition-all duration-200" href="/bookingpage">
+              <span className="material-symbols-outlined">calendar_month</span>
+              <span className="font-label-caps text-label-caps">Schedule</span>
+            </a>
+          </nav>
+
+        </div>
+        <div className="mt-auto border-t border-outline-variant p-md">
+          <button
+            type="button"
+            className="w-full bg-error/10 text-error py-sm rounded-lg font-title-sm flex items-center justify-center gap-xs hover:bg-error/15 transition-all active:scale-95"
+            onClick={() => {
+              logout()
+              window.location.href = '/'
+            }}
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Logout
+          </button>
+        </div>
+      </aside>
+
+
+
+      <header className="app-header flex justify-between items-center w-[calc(100%-16rem)] ml-64 px-margin-desktop py-sm sticky top-0 z-40">
         <div>
           <h2 className="font-headline-md text-headline-md font-bold text-primary">Patient Registry</h2>
         </div>
@@ -39,22 +87,20 @@ export default function Registry() {
         </div>
       </header>
 
-      <main className="ml-64 p-margin-desktop pt-[120px]">
+      <main className="ml-64 p-margin-desktop">
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
           <div className="p-md flex justify-between items-center border-b border-outline-variant">
             <div className="flex items-center gap-md">
               <h4 className="font-headline-md text-headline-md">Patient Database</h4>
               <div className="flex gap-xs">
-                <span className="px-sm py-xs bg-surface-container-high rounded-lg text-body-sm text-primary font-bold">
-                  All ({patients.length})
-                </span>
+                <span className="px-sm py-xs bg-surface-container-high rounded-lg text-body-sm text-primary font-bold">All ({patients.length})</span>
               </div>
             </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 bg-white border-b-2 border-primary z-10">
+              <thead className="sticky top-0 bg-surface-container-lowest border-b-2 border-primary z-10">
                 <tr>
                   <th className="p-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Patient ID</th>
                   <th className="p-md font-label-caps text-label-caps text-outline uppercase tracking-wider">Patient Name</th>
@@ -68,9 +114,7 @@ export default function Registry() {
                     <td className="p-md font-data-mono text-data-mono text-primary">{p.denthivePatientId || '-'}</td>
                     <td className="p-md">
                       <div className="flex items-center gap-sm">
-                        <span className="font-title-sm text-title-sm">
-                          {p.firstName} {p.lastName}
-                        </span>
+                        <span className="font-title-sm text-title-sm">{p.firstName} {p.lastName}</span>
                       </div>
                     </td>
                     <td className="p-md">
