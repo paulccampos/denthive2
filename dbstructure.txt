@@ -1,0 +1,482 @@
+DentHive MongoDB Collection “Table-Like Structure”
+====================================================
+
+This is a human-readable description of the collection shapes based on the
+Mongoose schemas used by the backend.
+
+Conventions:
+- Types use Mongo/Mongoose equivalents: string, int/number, boolean, date, objectId, array[string], etc.
+- “Description” is brief: what the field is used for in the app.
+
+
+1) Collection: users  (Mongoose model: User)
+---------------------------------------------
+Fields:
+- email: string
+  - Optional login/contact identifier for staff/patients.
+- username: string
+  - Optional login/contact identifier (not enforced unique).
+- passwordHash: string (required)
+  - Hashed password for authentication.
+- role: string (enum: patient|doctor|secretary|admin, default: patient)
+  - App authorization role.
+- active: boolean (default: true)
+  - Whether the user can sign in / is active.
+- patientId: objectId (ref: Patient, optional)
+  - Link to Patient record when the user is a patient.
+- createdAt: date
+  - Auto timestamp.
+- updatedAt: date
+  - Auto timestamp.
+
+
+2) Collection: patients  (Mongoose model: Patient)
+----------------------------------------------------
+Fields:
+- denthivePatientId: string (indexed)
+  - Human-readable patient identifier used by the app.
+- firstName: string (required)
+  - Patient first name.
+- lastName: string (required)
+  - Patient last name.
+- email: string (optional)
+  - Patient email.
+- phone: string (optional)
+  - Patient phone.
+- address: string (optional)
+  - Patient address.
+- dob: date (optional)
+  - Date of birth.
+- gender: string (optional)
+  - Patient gender.
+- allergies: array[string]
+  - Recorded allergies.
+- medications: array[string]
+  - Recorded medications.
+- chronicConditions: array[string]
+  - Chronic conditions.
+- outstandingBalance: number (default: 0)
+  - Patient balance to be tracked.
+- status: string (enum: active|pending|archived, default: active)
+  - Patient lifecycle state.
+- userId: objectId (ref: User, optional)
+  - Link to auth user account.
+- createdAt: date
+  - Auto timestamp.
+- updatedAt: date
+  - Auto timestamp.
+
+
+3) Collection: appointments  (Mongoose model: Appointment)
+------------------------------------------------------------
+Fields:
+- patientId: objectId (ref: Patient, indexed)
+  - The patient this appointment belongs to.
+- patientNameSnapshot: string (optional)
+  - Denormalized name captured at booking time.
+- serviceType: string (required)
+  - Type of dental service requested.
+- preferredDoctor: string (optional)
+  - Doctor preference entered by patient/secretary.
+- scheduledAt: date (required)
+  - When the appointment is scheduled.
+- toothFlags: array[string] (optional)
+  - Tooth identifiers affected (e.g. 'Upper 1', 'Lower 3').
+- createdByUserId: objectId (ref: User, optional)
+  - Who created the appointment.
+- status: string
+  - Enum: scheduled|waiting|calling|in_progress|next|completed|canceled|archived
+  - Default: waiting.
+- queuePosition: int/number (indexed, optional)
+  - Ordering position for queue management.
+- checkedInAt: date (optional)
+  - Timestamp when patient checked in.
+- completedAt: date (optional)
+  - Timestamp when appointment marked completed.
+- createdAt: date
+  - Auto timestamp.
+- updatedAt: date
+  - Auto timestamp.
+
+
+4) Collection: clinical_records  (Mongoose model: ClinicalRecord)
+-------------------------------------------------------------------
+Fields:
+- patientId: objectId (ref: Patient, indexed)
+  - Patient owning the record.
+- appointmentId: objectId (ref: Appointment, indexed)
+  - Appointment associated with the clinical entry.
+- procedures: array[object]
+  - Each procedure object:
+    - tooth: string (optional)
+    - procedure: string (optional)
+    - extracted: boolean (default: false)
+- consultationNotes: string (optional)
+  - Notes taken by the doctor.
+- pricePHP: number (optional)
+  - Total/estimated price in PHP for this clinical record.
+- createdByUserId: objectId (ref: User, optional)
+  - Doctor user that created the record.
+- createdByRole: string (enum: 'doctor', default: 'doctor')
+  - Role tag for audit.
+- status: string (enum: pending|completed, default: completed)
+  - Record status.
+- createdAt: date
+  - Auto timestamp.
+- updatedAt: date
+  - Auto timestamp.
+
+
+5) Collection: procedure_prices  (Mongoose model: ProcedurePrice)
+-------------------------------------------------------------------
+Fields:
+- serviceType: string (required, indexed, UNIQUE)
+  - Service name used to calculate prices.
+- pricePHP: number (required)
+  - Price in PHP for the service.
+- description: string (optional)
+  - Short description of what the price includes.
+- isCommon: boolean (default: true)
+  - Whether the service is commonly used in the UI.
+- createdAt: date
+  - Auto timestamp.
+- updatedAt: date
+  - Auto timestamp.
+
+
+6) Collection: finished  (Mongoose model: FinishedAppointment)
+---------------------------------------------------------------
+Note: This model explicitly sets `collection: 'finished'`.
+
+Fields:
+- patientId: objectId (ref: Patient, indexed)
+  - Patient that the finished appointment belongs to.
+- patientNameSnapshot: string (optional)
+  - Denormalized patient name.
+- serviceType: string (required)
+  - Service type for the finished visit.
+- preferredDoctor: string (optional)
+  - Doctor preference (if stored).
+- scheduledAt: date (required)
+  - Original scheduled time.
+- toothFlags: array[string] (optional)
+  - Tooth identifiers.
+- createdByUserId: objectId (ref: User, optional)
+  - Who created/recorded the finished appointment.
+- appointmentId: objectId (ref: Appointment, indexed)
+  - Link back to original appointment.
+- consultationNotes: string (optional)
+  - Doctor notes for the finished appointment.
+- procedures: array[object]
+  - Each procedure object:
+    - tooth: string (optional)
+    - procedure: string (optional)
+    - extracted: boolean (default: false)
+- pricePHP: number (required)
+  - Total price.
+- status: string (enum: finished|paid|archived, default: finished)
+  - Payment/archival lifecycle.
+- finishedAt: date (default: now)
+  - Time when marked finished.
+- paidAt: date (optional)
+  - Time when marked paid.
+- createdByRole: string (enum: 'doctor', default: 'doctor')
+  - Role tag for audit.
+- createdAt: date
+  - Auto timestamp.
+- updatedAt: date
+  - Auto timestamp.
+
+
+7) Collection: history  (Mongoose model: HistoryAppointment)
+--------------------------------------------------------------
+Note: This model explicitly sets `collection: 'history'`.
+
+Fields:
+- patientId: objectId (ref: Patient, indexed)
+  - Patient associated with history entry.
+- patientNameSnapshot: string (optional)
+  - Denormalized patient name.
+- serviceType: string (required)
+  - Service type requested.
+- preferredDoctor: string (optional)
+  - Doctor preference.
+- scheduledAt: date (required)
+  - Scheduled time.
+- toothFlags: array[string] (optional)
+  - Tooth identifiers.
+- createdByUserId: objectId (ref: User, optional)
+  - Who created/handled the appointment.
+- status: string
+  - Enum: scheduled|waiting|calling|in_progress|next|completed|canceled|archived
+  - Tracks historical status changes.
+- queuePosition: int/number (indexed, optional)
+  - Queue ordering at the time.
+- appointmentId: objectId (ref: Appointment, indexed)
+  - Link to original appointment.
+- checkedInAt: date (optional)
+  - Check-in timestamp.
+- completedAt: date (optional)
+  - Completion timestamp.
+- historyReason: string (optional)
+  - Freeform reason stored when archiving/canceling/moving to history.
+- createdAt: date
+  - Auto timestamp.
+- updatedAt: date
+  - Auto timestamp.
+
+
+
+8) Collection Operations (CRUD-style “dbstructure queries”)
+============================================================
+
+This section documents the app’s CRUD-like flows as “queries” under the
+Mongoose collections. These are based on the backend route handlers.
+
+Legend:
+- CREATE: insert into collection(s)
+- UPDATE: modify existing document(s)
+- DELETE: remove from active collections (often moved to history instead)
+- RETRIEVE: list/get documents
+
+
+A) patient.create (creates Patient + related User)
+--------------------------------------------------
+Route: POST /api/auth/register
+
+Creates:
+- patients (dent-hive patient profile)
+- users (role=patient, linked by patientId)
+
+Algorithm (server-side):
+1. Validate required fields: password, firstName, lastName; require (email or username).
+2. Generate denthivePatientId: DC-XXXX using Patient.countDocuments() with collision checks.
+3. Patient.create({ denthivePatientId, firstName, lastName, email, phone, dob, gender, status:'active' })
+4. User.create({ email, username, passwordHash, role:'patient', patientId: patient._id, active:true })
+5. patient.userId = user._id; patient.save()
+
+Returns: { token, role }
+
+Notes:
+- If email provided: must end with "email.com".
+- Email/username are NOT unique, but server catches duplicate key errors if they exist.
+
+
+B) patient.retrieve.me (patient reads own profile)
+---------------------------------------------------
+Route: GET /api/patients/me
+
+Reads:
+- patients.findOne({ userId: req.auth.sub })
+
+Returns:
+- profile fields used by Patient Dashboard / Editor (including allergies/medications/chronicConditions)
+
+
+C) patient.update.me (patient edits own fields)
+--------------------------------------------------
+Route: PUT /api/patients/me
+
+Updates (patients only):
+- firstName, lastName, email, phone, address, dob, gender
+- allergies (array), medications (array), chronicConditions (array)
+
+Behavior:
+- Replaces arrays when provided; filters falsy values.
+- Does not change denthivePatientId or timestamps.
+
+
+D) appointment.create (patient booking)
+----------------------------------------
+Route: POST /api/appointments/
+Requires auth role: patient
+
+Creates:
+- appointments
+
+Side-effect updates:
+- patients (allergies/medications/chronicConditions) based on request body
+
+Key fields:
+- patientId, patientNameSnapshot (firstName + lastName at booking time)
+- serviceType (required)
+- preferredDoctor (optional)
+- scheduledAt (required, stored as Date)
+- toothFlags (optional array)
+- createdByUserId = req.auth.sub
+- status = 'waiting'
+
+Conflict check:
+- prevents overlaps for statuses:
+  scheduled|waiting|calling|in_progress|next
+- doctor logic:
+  - if preferredDoctor is specific: conflict on same preferredDoctor
+  - if preferredDoctor missing or "Any Available Practitioner": conflict on any preferredDoctor
+
+Returns: { appointment }
+
+
+E) appointment.retrieve.me (patient bookings list)
+--------------------------------------------------
+Route: GET /api/appointments/me
+Reads:
+- appointments.find({ patientId }).sort({scheduledAt:-1}).lean()
+
+
+F) appointment.retrieve.list (staff/doctor/secretary)
+------------------------------------------------------
+Route: GET /api/appointments/
+(Used for secretary/doctor/admin UI)
+
+Reads:
+- appointments.find(filter).sort({scheduledAt:1}).limit(200)
+
+Enrichment (per appointment):
+- joins patients to populate patient info shown in UI
+
+
+G) appointment.update.status / reschedule
+------------------------------------------
+Route: PATCH /api/appointments/:id
+Auth role constraints depend on UI; internally supports status and/or scheduledAt.
+
+Updates in appointments:
+- status (and corresponding timestamps)
+  - calling => checkedInAt = new Date()
+  - completed => completedAt = new Date()
+- scheduledAt (with conflict check)
+
+Move to history:
+- if appt.status becomes 'completed' or 'canceled':
+  1) create HistoryAppointment with snapshot fields
+  2) delete Appointment from appointments collection
+
+
+H) appointment.delete (move to history)
+----------------------------------------
+Route: DELETE /api/appointments/:id
+Auth roles: doctor|secretary|admin
+
+Behavior:
+- set appointments.status='archived'
+- create HistoryAppointment with historyReason='deleted'
+- delete one Appointment doc from appointments
+
+
+I) clinicalRecord.create (doctor writes clinical exam)
+--------------------------------------------------------
+Route: POST /api/clinical/
+Auth role: doctor
+
+Creates:
+- clinical_records
+
+Also updates:
+- appointments.status = 'completed'
+
+ClinicalRecord payload mapping:
+- patientId, appointmentId from Appointment lookup
+- procedures (array), consultationNotes, pricePHP
+- createdByRole='doctor', status='completed'
+
+
+J) clinicalRecord.retrieve.me (patient history of clinical records)
+-----------------------------------------------------------------------
+Route: GET /api/clinical/me
+Auth role: patient
+
+Reads:
+- clinical_records.find({ patientId }).sort({createdAt:-1})
+
+
+K) clinicalRecord.retrieve.byAppointment
+-----------------------------------------
+Route: GET /api/clinical/by-appointment/:appointmentId
+Auth roles: secretary|admin|doctor
+
+Reads:
+- clinical_records.find({ appointmentId }).sort({createdAt:-1})
+
+
+L) finished.create (doctor finishes procedure, unpaid)
+--------------------------------------------------------
+Route: POST /api/finished/:appointmentId/finish
+Auth role: doctor
+
+Creates:
+- finished (FinishedAppointment)
+
+Deletes:
+- appointments (removes active appointment)
+
+FinishedAppointment fields:
+- patientId, patientNameSnapshot, serviceType, preferredDoctor, scheduledAt, toothFlags
+- procedures, consultationNotes, pricePHP
+- status='finished'
+- appointmentId linked back
+
+
+M) finished.pay (secretary marks paid → move to history)
+-------------------------------------------------------------
+Route: POST /api/finished/:id/pay
+Auth roles: secretary|admin
+
+Updates:
+- finished.status='paid', paidAt=now
+
+Creates:
+- history entry (HistoryAppointment) with:
+  - status='completed'
+  - historyReason='paid'
+
+Deletes:
+- finished document (removes from finished queue)
+
+
+N) history.retrieve.list
+------------------------
+Route: GET /api/history/
+Auth roles: secretary|admin
+
+Reads:
+- history.find(filter).sort({scheduledAt:-1}).limit(500)
+
+
+O) history.delete (permanent)
+------------------------------
+Route: DELETE /api/history/:id
+Auth roles: secretary|admin
+
+Deletes:
+- history document by _id
+
+
+P) history.restore (history → active appointment)
+---------------------------------------------------
+Route: POST /api/history/:id/restore
+Auth roles: secretary|admin
+
+Creates:
+- appointments (status='waiting') using history snapshots
+
+Deletes:
+- history document
+
+
+
+Q) queue.checkin / queue.complete / queue.reorder
+--------------------------------------------------
+Queue endpoints do not mutate patient docs directly, but they mutate appointment lifecycle.
+
+Routes:
+- POST /api/queue/:id/checkin
+  - updates appointments.status='calling', checkedInAt=now
+
+- POST /api/queue/:id/complete
+  - updates appointments.status='completed', completedAt=now
+  - moves to history and deletes Appointment
+
+- PATCH /api/queue/reorder
+  - bulk updates appointments.queuePosition based on provided ids array
+
+
