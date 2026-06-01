@@ -9,15 +9,12 @@ These files are **example documents** aligned with the current Mongoose schemas:
 ## Important: login/password
 Your backend stores `passwordHash` (bcrypt). A valid login requires a **correct bcrypt hash**.
 
-This repo already seeds demo accounts at server startup via `backend/seed.js`.
+This repo does **not** auto-seed demo login accounts at server startup.
 
-### Seeded login credentials (works immediately)
-- **Admin**: username `admin` (email `admin@denthive.local`), password `patient1`
-- **Secretary**: username `secretary` (email `secretary@denthive.local`), password `patient1`
-- **Doctor**: username `doctor` (email `doctor@denthive.local`), password `patient1`
-- **Patient**: username `patient` (email `patient@denthive.local`), password `patient1`
+So, for most dev usage you typically **should not** rely on `users.example.json` for working passwords.
+Accounts must be created via your admin workflow (or `/api/auth/register` for patients).
 
-So, for most dev usage you do **not** need to import `users.example.json`.
+
 
 ## How to use these fixtures
 - Treat them as reference / sample data.

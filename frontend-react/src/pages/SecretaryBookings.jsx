@@ -127,14 +127,14 @@ export default function SecretaryBookings() {
           <p className="font-label-caps text-label-caps text-outline">Secretary Portal</p>
         </div>
         <nav className="flex-1 mt-md space-y-xs px-sm overflow-y-auto no-scrollbar">
-          <a className="bg-primary-container text-on-primary-container font-bold px-md py-sm flex items-center gap-sm rounded-lg border-r-4 border-primary transition-all" href="#">
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/queuemanagement">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
-            <span className="font-label-caps text-label-caps">Bookings</span>
+            <span className="font-label-caps text-label-caps">Queue</span>
           </a>
 
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/secretaryfinished">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>paid</span>
-            <span className="font-label-caps text-label-caps">Finished & Payment</span>
+          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/history">
+            <span className="material-symbols-outlined">history</span>
+            <span className="font-label-caps text-label-caps">History</span>
           </a>
 
           <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/registry">
@@ -147,22 +147,10 @@ export default function SecretaryBookings() {
             <span className="font-label-caps text-label-caps">Payments</span>
           </a>
 
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/history">
-            <span className="material-symbols-outlined">history</span>
-            <span className="font-label-caps text-label-caps">History</span>
-          </a>
 
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/queuemanagement">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
-            <span className="font-label-caps text-label-caps">Queue</span>
-          </a>
-
-          <a className="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-container-highest transition-all" href="/bookingpage">
-            <span className="material-symbols-outlined">calendar_month</span>
-            <span className="font-label-caps text-label-caps">Schedule</span>
-          </a>
 
         </nav>
+
         <div className="p-md border-t border-outline-variant mt-auto">
           <button
             type="button"

@@ -2,7 +2,17 @@ import React from 'react'
 import { logout } from '../lib/api'
 
 const SECRETARY_NAV = [
-  // Alphabetical order requested: Patients, Payments, History, Queue, Schedule
+  // Requested order: Queue, History, Patients, Payments
+  {
+    label: 'Queue',
+    icon: 'group',
+    href: '/queuemanagement',
+  },
+  {
+    label: 'History',
+    icon: 'history',
+    href: '/history',
+  },
   {
     label: 'Patients',
     icon: 'folder_shared',
@@ -13,22 +23,8 @@ const SECRETARY_NAV = [
     icon: 'paid',
     href: '/secretaryfinished',
   },
-  {
-    label: 'History',
-    icon: 'history',
-    href: '/history',
-  },
-  {
-    label: 'Queue',
-    icon: 'group',
-    href: '/queuemanagement',
-  },
-  {
-    label: 'Schedule',
-    icon: 'calendar_month',
-    href: '/bookingpage',
-  },
 ]
+
 
 
 
